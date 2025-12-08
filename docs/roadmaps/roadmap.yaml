@@ -127,3 +127,56 @@ roadmap:
   - testing
   - quality
   notes: null
+- id: SSE-008
+  github_issue: null
+  item_type: task
+  title: GitHub Actions CI/CD pipeline
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - ci
+  - automation
+  notes: null
+- id: SSE-009
+  github_issue: null
+  item_type: task
+  title: Real Aprender model loading and inference
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - core
+  - inference
+  notes: null
+- id: SSE-010
+  github_issue: null
+  item_type: task
+  title: README documentation with usage examples
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - docs
+  notes: null
