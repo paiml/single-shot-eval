@@ -1,0 +1,32 @@
+# Sentiment Analysis Task Configuration
+# Reference: Stanford Sentiment Treebank (SST-2)
+# https://nlp.stanford.edu/sentiment/
+
+task:
+  id: sentiment-sst2
+  description: "Binary sentiment classification (positive/negative)"
+  domain: nlp
+
+evaluation:
+  metric: accuracy
+  samples: 1000
+  timeout_ms: 5000
+
+prompts:
+  system: |
+    You are a sentiment classifier. Analyze the sentiment of the given text
+    and respond with exactly one word: "positive" or "negative".
+  user_template: |
+    Classify the sentiment of this text:
+    "{input}"
+
+    Respond with exactly one word: positive or negative
+
+ground_truth:
+  source: "data/sst2-test.jsonl"
+  label_key: "label"
+
+slm_optimization:
+  attention_heads_required: 4
+  context_length: 256
+  quantization_viable: true

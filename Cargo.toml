@@ -1,0 +1,107 @@
+[package]
+name = "single-shot-eval"
+version = "0.1.0"
+edition = "2021"
+authors = ["PAIML <engineering@paiml.com>"]
+description = "SLM Pareto Frontier Evaluation Framework - OFFLINE-FIRST evaluation using Batuta sovereign stack"
+license = "MIT"
+repository = "https://github.com/paiml/single-shot-eval"
+keywords = ["slm", "evaluation", "pareto", "ml", "benchmarks"]
+categories = ["command-line-utilities", "science"]
+
+[dependencies]
+# =============================================================================
+# BATUTA SOVEREIGN STACK (crates.io ONLY - NO git dependencies)
+# =============================================================================
+# Core ML library - .apr format, inference, metrics
+aprender = "0.15"
+# Training/distillation/conversion library
+entrenar = "0.2"
+
+# =============================================================================
+# CLI & Configuration
+# =============================================================================
+clap = { version = "4.5", features = ["derive", "env"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# =============================================================================
+# Error handling
+# =============================================================================
+anyhow = "1.0"
+thiserror = "2.0"
+
+# =============================================================================
+# Shell utilities (for CLI baseline wrappers)
+# =============================================================================
+shell-words = "1.1"
+
+# =============================================================================
+# Logging
+# =============================================================================
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# =============================================================================
+# Statistics (for bootstrap CI, significance testing)
+# =============================================================================
+statrs = "0.17"
+rand = "0.8"
+rand_chacha = "0.3"
+
+# =============================================================================
+# Time measurement & reporting
+# =============================================================================
+chrono = { version = "0.4", features = ["serde"] }
+tabled = "0.16"
+
+# =============================================================================
+# Temp file handling for compiler verification
+# =============================================================================
+tempfile = "3.14"
+
+# =============================================================================
+# NOTE: NO HTTP dependencies - OFFLINE-FIRST
+# Baselines via shell exec to `claude` and `gemini` CLI tools
+# =============================================================================
+
+[dev-dependencies]
+# Testing
+proptest = "1.5"
+criterion = { version = "0.5", features = ["html_reports"] }
+insta = { version = "1.41", features = ["yaml"] }
+
+[[bin]]
+name = "single-shot-eval"
+path = "src/main.rs"
+
+[lib]
+name = "single_shot_eval"
+path = "src/lib.rs"
+
+[[bench]]
+name = "pareto"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+debug = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+# ML-specific allows
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+float_cmp = "allow"
+many_single_char_names = "allow"

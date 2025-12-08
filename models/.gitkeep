@@ -1,0 +1,6 @@
+# Model directory
+# Download models with: make models
+# Reference models:
+#   - tinyllama-1.1b.apr (TinyLlama-1.1B-Chat)
+#   - smollm-135m.apr (SmolLM-135M)
+#   - smollm-360m.apr (SmolLM-360M)

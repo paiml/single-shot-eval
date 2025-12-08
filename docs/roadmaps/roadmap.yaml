@@ -1,0 +1,129 @@
+roadmap_version: '1.0'
+github_enabled: false
+github_repo: paiml/single-shot-eval
+roadmap:
+- id: SSE-001
+  github_issue: null
+  item_type: task
+  title: Integrate aprender/entrenar dependencies
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 2025-12-08T19:13:12.040353093+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - foundation
+  - dependencies
+  notes: null
+- id: SSE-002
+  github_issue: null
+  item_type: task
+  title: Config module - Task YAML parsing
+  status: inprogress
+  priority: critical
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 2025-12-08T19:13:28.428018080+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - foundation
+  - config
+  notes: null
+- id: SSE-003
+  github_issue: null
+  item_type: task
+  title: Pareto frontier analysis module
+  status: planned
+  priority: critical
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - core
+  - pareto
+  notes: null
+- id: SSE-004
+  github_issue: null
+  item_type: task
+  title: CLI baseline wrappers
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - baselines
+  - cli
+  notes: null
+- id: SSE-005
+  github_issue: null
+  item_type: task
+  title: Runner orchestration
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - core
+  - runner
+  notes: null
+- id: SSE-006
+  github_issue: null
+  item_type: task
+  title: Report generation
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - reporting
+  notes: null
+- id: SSE-007
+  github_issue: null
+  item_type: task
+  title: Integration tests and quality gates
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - testing
+  - quality
+  notes: null

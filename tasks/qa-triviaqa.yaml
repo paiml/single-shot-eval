@@ -1,0 +1,31 @@
+# Question Answering Task Configuration
+# Reference: TriviaQA benchmark
+# https://nlp.cs.washington.edu/triviaqa/
+
+task:
+  id: qa-triviaqa
+  description: "Open-domain question answering"
+  domain: nlp
+
+evaluation:
+  metric: f1
+  samples: 1000
+  timeout_ms: 5000
+
+prompts:
+  system: |
+    You are a question answering assistant. Answer the question concisely
+    and accurately. If you're not sure, give your best guess.
+  user_template: |
+    Question: {question}
+
+    Answer:
+
+ground_truth:
+  source: "data/triviaqa-test.jsonl"
+  label_key: "answer"
+
+slm_optimization:
+  attention_heads_required: 6
+  context_length: 384
+  quantization_viable: true

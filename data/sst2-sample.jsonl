@@ -1,0 +1,20 @@
+{"input": "This movie is absolutely fantastic!", "label": "positive"}
+{"input": "I loved every minute of this film.", "label": "positive"}
+{"input": "A masterpiece of modern cinema.", "label": "positive"}
+{"input": "The acting was superb and the story compelling.", "label": "positive"}
+{"input": "One of the best movies I've seen this year.", "label": "positive"}
+{"input": "This was a complete waste of time.", "label": "negative"}
+{"input": "Terrible acting and a boring plot.", "label": "negative"}
+{"input": "I couldn't wait for this movie to end.", "label": "negative"}
+{"input": "The worst film I've ever seen.", "label": "negative"}
+{"input": "Avoid this movie at all costs.", "label": "negative"}
+{"input": "A delightful surprise from start to finish.", "label": "positive"}
+{"input": "The cinematography was breathtaking.", "label": "positive"}
+{"input": "Dull, lifeless, and uninspired.", "label": "negative"}
+{"input": "What a disappointment this turned out to be.", "label": "negative"}
+{"input": "Highly recommended for all audiences.", "label": "positive"}
+{"input": "An emotional rollercoaster in the best way.", "label": "positive"}
+{"input": "Poorly written with no redeeming qualities.", "label": "negative"}
+{"input": "The pacing was off and the dialogue stilted.", "label": "negative"}
+{"input": "A triumph of storytelling and visual effects.", "label": "positive"}
+{"input": "Boring and predictable from the first scene.", "label": "negative"}

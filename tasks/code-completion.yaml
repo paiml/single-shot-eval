@@ -1,0 +1,36 @@
+# Code Completion Task Configuration
+# Reference: HumanEval benchmark
+# https://github.com/openai/human-eval
+
+task:
+  id: code-humaneval
+  description: "Python function completion from docstring"
+  domain: software
+
+evaluation:
+  metric: exact_match
+  samples: 164  # Full HumanEval test set
+  timeout_ms: 10000
+
+prompts:
+  system: |
+    You are a Python code completion assistant. Complete the function
+    implementation based on the docstring. Return ONLY the function body,
+    no explanations.
+  user_template: |
+    Complete this Python function:
+
+    ```python
+    {input}
+    ```
+
+    Return only the function body code, nothing else.
+
+ground_truth:
+  source: "data/humaneval.jsonl"
+  label_key: "canonical_solution"
+
+slm_optimization:
+  attention_heads_required: 8
+  context_length: 512
+  quantization_viable: false  # Code requires precision

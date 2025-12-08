@@ -1,0 +1,95 @@
+# single-shot-eval - Dependency Policy
+# cargo-deny configuration for license, advisory, and ban checks
+
+[graph]
+targets = []
+all-features = false
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+# =============================================================================
+# Advisory Database Configuration
+# =============================================================================
+[advisories]
+ignore = []
+
+# =============================================================================
+# License Configuration
+# =============================================================================
+[licenses]
+# List of explicitly allowed licenses
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "MPL-2.0",
+    "BSL-1.0",
+]
+# Confidence threshold for license detection
+confidence-threshold = 0.8
+# Allow 1 or more licenses on a per-crate basis
+exceptions = []
+
+# =============================================================================
+# Crate Bans
+# =============================================================================
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+highlight = "all"
+workspace-default-features = "allow"
+external-default-features = "allow"
+
+# Allowed crates (empty - we use deny list approach)
+allow = []
+
+# BANNED CRATES
+deny = [
+    # ==========================================================================
+    # COVERAGE TOOLING: Use cargo-llvm-cov ONLY
+    # ==========================================================================
+    { crate = "cargo-tarpaulin", reason = "Use cargo-llvm-cov for coverage. Tarpaulin has compatibility issues." },
+
+    # ==========================================================================
+    # HTTP DEPENDENCIES: OFFLINE-FIRST Architecture
+    # ==========================================================================
+    { crate = "reqwest", reason = "OFFLINE-FIRST: No HTTP clients allowed. Use CLI baselines via shell exec." },
+    { crate = "hyper", reason = "OFFLINE-FIRST: No HTTP dependencies." },
+    { crate = "surf", reason = "OFFLINE-FIRST: No HTTP clients allowed." },
+    { crate = "ureq", reason = "OFFLINE-FIRST: No HTTP clients allowed." },
+    { crate = "attohttpc", reason = "OFFLINE-FIRST: No HTTP clients allowed." },
+    { crate = "isahc", reason = "OFFLINE-FIRST: No HTTP clients allowed." },
+
+    # ==========================================================================
+    # Deprecated/Unmaintained
+    # ==========================================================================
+    { crate = "openssl", wrappers = [], reason = "Prefer rustls for TLS if ever needed." },
+]
+
+# Skip certain crates from duplicate detection
+skip = []
+
+# Tree of crates to skip
+skip-tree = []
+
+# =============================================================================
+# Source Configuration
+# =============================================================================
+[sources]
+# Only allow crates from crates.io
+unknown-registry = "deny"
+unknown-git = "deny"
+
+# Allow crates.io
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+
+# No git dependencies allowed (BATUTA SOVEREIGN STACK: crates.io only)
+allow-git = []

@@ -13,9 +13,38 @@ target
 # Contains mutation testing data
 **/mutants.out*/
 
-# RustRover
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+# Debug artifacts
+*.dSYM/
+*.su
+*.idb
+
+# Coverage reports
+coverage/
+lcov.info
+*.profraw
+*.profdata
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# PMAT Integration
+# O(1) Quality Gate Metrics Cache
+.pmat-metrics/
+# TDG Baseline (regenerated per-session)
+.pmat/baseline.json
+# Generated deep context
+deep_context.md
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results directory (large evaluation data)
+results/
+!results/.gitkeep
