@@ -49,7 +49,7 @@ pub use baselines::{
 };
 pub use config::{
     validate_apr_format, BaselineConfig, EvalConfig, EvaluationSettings, GroundTruthConfig,
-    MetricType, PromptConfig, TaskConfig, TaskDefinition,
+    MetricType, PromptConfig, TaskConfig, TaskDefinition, TaskLoader,
 };
 pub use compiler::{
     BatchResult, BatchVerifier, CompilerConfig, CompilerError, CompilerVerifier, VerificationResult,

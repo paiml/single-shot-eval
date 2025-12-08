@@ -265,6 +265,91 @@ impl BaselineConfig {
     }
 }
 
+/// Task loader for loading multiple task configurations from glob patterns
+pub struct TaskLoader {
+    tasks: Vec<TaskConfig>,
+}
+
+impl TaskLoader {
+    /// Create a new empty task loader
+    #[must_use]
+    pub const fn new() -> Self {
+        Self { tasks: Vec::new() }
+    }
+
+    /// Load tasks from a glob pattern (e.g., "tasks/*.yaml")
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the glob pattern is invalid or files cannot be loaded.
+    pub fn load_glob(pattern: &str) -> Result<Self, ConfigError> {
+        let mut loader = Self::new();
+
+        let paths = glob::glob(pattern)
+            .map_err(|e| ConfigError::MissingField(format!("Invalid glob pattern: {e}")))?;
+
+        for entry in paths {
+            let path = entry
+                .map_err(|e| ConfigError::IoError(std::io::Error::other(
+                    format!("Glob error: {e}")
+                )))?;
+
+            let config = TaskConfig::load(&path)?;
+            loader.tasks.push(config);
+        }
+
+        Ok(loader)
+    }
+
+    /// Load a single task from a file path
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file cannot be loaded.
+    pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Self, ConfigError> {
+        let config = TaskConfig::load(path)?;
+        Ok(Self { tasks: vec![config] })
+    }
+
+    /// Get all loaded tasks
+    #[must_use]
+    pub fn tasks(&self) -> &[TaskConfig] {
+        &self.tasks
+    }
+
+    /// Get the number of loaded tasks
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.tasks.len()
+    }
+
+    /// Check if no tasks are loaded
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.tasks.is_empty()
+    }
+
+    /// Iterate over loaded tasks
+    pub fn iter(&self) -> impl Iterator<Item = &TaskConfig> {
+        self.tasks.iter()
+    }
+}
+
+impl Default for TaskLoader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl IntoIterator for TaskLoader {
+    type Item = TaskConfig;
+    type IntoIter = std::vec::IntoIter<TaskConfig>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.tasks.into_iter()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -438,5 +523,74 @@ ground_truth:
         let msg = format!("{err}");
         assert!(msg.contains(".apr"));
         assert!(msg.contains("model.gguf"));
+    }
+
+    #[test]
+    fn test_task_loader_new() {
+        let loader = TaskLoader::new();
+        assert!(loader.is_empty());
+        assert_eq!(loader.len(), 0);
+    }
+
+    #[test]
+    fn test_task_loader_default() {
+        let loader = TaskLoader::default();
+        assert!(loader.is_empty());
+    }
+
+    #[test]
+    fn test_task_loader_load_glob() {
+        // This should work with the existing tasks/*.yaml files
+        let loader = TaskLoader::load_glob("tasks/*.yaml");
+        assert!(loader.is_ok());
+        let loader = loader.unwrap();
+        assert!(!loader.is_empty());
+    }
+
+    #[test]
+    fn test_task_loader_load_glob_no_matches() {
+        let loader = TaskLoader::load_glob("nonexistent/*.yaml");
+        assert!(loader.is_ok());
+        let loader = loader.unwrap();
+        assert!(loader.is_empty());
+    }
+
+    #[test]
+    fn test_task_loader_load_file() {
+        let loader = TaskLoader::load_file("tasks/code-completion.yaml");
+        assert!(loader.is_ok());
+        let loader = loader.unwrap();
+        assert_eq!(loader.len(), 1);
+        assert_eq!(loader.tasks()[0].task.id, "code-humaneval");
+    }
+
+    #[test]
+    fn test_task_loader_load_file_not_found() {
+        let result = TaskLoader::load_file("nonexistent.yaml");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_task_loader_iter() {
+        let loader = TaskLoader::load_glob("tasks/*.yaml").unwrap();
+        let count = loader.iter().count();
+        assert!(count >= 1);
+    }
+
+    #[test]
+    fn test_task_loader_into_iter() {
+        let loader = TaskLoader::load_glob("tasks/*.yaml").unwrap();
+        assert!(loader.into_iter().next().is_some());
+    }
+
+    #[test]
+    fn test_task_loader_tasks_slice() {
+        let loader = TaskLoader::load_glob("tasks/*.yaml").unwrap();
+        let tasks = loader.tasks();
+        assert!(!tasks.is_empty());
+        // All tasks should have valid IDs
+        for task in tasks {
+            assert!(!task.task.id.is_empty());
+        }
     }
 }

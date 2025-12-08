@@ -92,6 +92,7 @@ enum Commands {
     },
 }
 
+#[allow(clippy::too_many_lines)]
 fn main() {
     // Initialize tracing
     tracing_subscriber::fmt()
@@ -188,7 +189,7 @@ fn main() {
                     }
                     println!("Build time: {:?}", result.build_time);
                     if let Some(test_time) = result.test_time {
-                        println!("Test time: {:?}", test_time);
+                        println!("Test time: {test_time:?}");
                     }
                     println!("\nGround truth: {}", if result.passes() { "PASS" } else { "FAIL" });
 
