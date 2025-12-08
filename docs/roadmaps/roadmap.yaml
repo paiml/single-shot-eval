@@ -24,7 +24,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Config module - Task YAML parsing
-  status: inprogress
+  status: completed
   priority: critical
   assigned_to: null
   created: 1970-01-01T00:00:00Z
@@ -42,7 +42,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Pareto frontier analysis module
-  status: planned
+  status: completed
   priority: critical
   assigned_to: null
   created: 1970-01-01T00:00:00Z
@@ -60,7 +60,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: CLI baseline wrappers
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 1970-01-01T00:00:00Z
@@ -78,7 +78,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Runner orchestration
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 1970-01-01T00:00:00Z
@@ -96,7 +96,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Report generation
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
@@ -113,7 +113,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Integration tests and quality gates
-  status: planned
+  status: inprogress
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
