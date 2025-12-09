@@ -4,10 +4,12 @@
 //! of single-shot-eval components (inference.rs, corpus.rs, runner.rs).
 
 #![allow(clippy::unwrap_used)]
+#![allow(clippy::cast_lossless)] // Safe casts in test code (i32 to f64)
+#![allow(clippy::suboptimal_flops)] // Test values don't need FMA optimization
 
 use single_shot_eval::{
-    create_placeholder_model, infer_difficulty, Difficulty, InferenceOutput, LoadedModel,
-    ModelConfig, ModelLoader, ModelMetadata, Py2RsLevel,
+    create_placeholder_model, infer_difficulty, Difficulty, LoadedModel, ModelConfig, ModelLoader,
+    ModelMetadata, Py2RsLevel,
 };
 use std::time::Duration;
 
@@ -191,7 +193,7 @@ fn test_py2rs_level_coverage() {
     // Test all Py2RsLevel variants
     for level in Py2RsLevel::all() {
         let num = level.number();
-        assert!(num >= 1 && num <= 10, "Level number should be 1-10");
+        assert!((1..=10).contains(&num), "Level number should be 1-10");
 
         let weight = level.weight();
         assert!(weight > 0.0, "Weight should be positive");
@@ -743,8 +745,12 @@ fn test_inference_output_clone() {
         tokens_generated: 5,
     };
     let cloned = output.clone();
+    // Verify clone has same values
     assert_eq!(cloned.text, "test");
     assert_eq!(cloned.tokens_generated, 5);
+    // Verify original still accessible (proves clone not move)
+    assert_eq!(output.text, "test");
+    assert_eq!(output.tokens_generated, 5);
 }
 
 // =============================================================================
@@ -925,7 +931,7 @@ fn test_available_baselines_function() {
 }
 
 #[test]
-#[ignore] // Slow: calls external baseline CLIs (claude, gemini)
+#[ignore = "slow: calls external baseline CLIs"]
 fn test_run_all_baselines_function() {
     use single_shot_eval::run_all_baselines;
 
@@ -1020,7 +1026,7 @@ fn test_corpus_missing_source_in_directory() {
 
 #[test]
 fn test_runner_run_evaluation_multiple_models() {
-    use single_shot_eval::{TaskRunner, RunnerConfig};
+    use single_shot_eval::TaskRunner;
     use single_shot_eval::config::{TaskConfig, TaskDefinition, EvaluationSettings, MetricType, PromptConfig, GroundTruthConfig};
 
     let task = TaskConfig {
@@ -1056,7 +1062,7 @@ fn test_runner_run_evaluation_multiple_models() {
 }
 
 #[test]
-#[ignore] // Slow: calls external baseline CLIs (claude, gemini)
+#[ignore = "slow: calls external baseline CLIs"]
 fn test_runner_with_baselines_enabled() {
     use single_shot_eval::{TaskRunner, RunnerConfig};
     use single_shot_eval::config::{TaskConfig, TaskDefinition, EvaluationSettings, MetricType, PromptConfig, GroundTruthConfig};
