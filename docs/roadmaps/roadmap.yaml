@@ -383,3 +383,30 @@ roadmap:
   - quality
   - pmat
   notes: Repo score improved from 85.5 to 94.0 (Grade A)
+- id: SSE-020
+  github_issue: null
+  item_type: task
+  title: Add mdBook documentation (trueno pattern)
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Create book/book.toml configuration
+  - Create SUMMARY.md with chapter structure
+  - Add getting-started chapters (installation, quick-start, cli-usage)
+  - Add architecture chapters (overview, batuta-stack, pareto-analysis)
+  - Add api-reference chapters (config, corpus, pareto, runner, report)
+  - Add examples chapters (basic-evaluation, py2rs-benchmark, custom-baselines)
+  - Add appendix (changelog, references)
+  - Build successfully with mdbook
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - docs
+  - book
+  - mdbook
+  notes: 18 markdown files following trueno book pattern
