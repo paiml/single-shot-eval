@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f23"/>
+      <stop offset="100%" style="stop-color:#1a1a3e"/>
+    </linearGradient>
+    <linearGradient id="pareto" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="slm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#ef4444"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- Pareto frontier curve -->
+  <g transform="translate(200, 150)">
+    <!-- Axes -->
+    <line x1="0" y1="300" x2="400" y2="300" stroke="#444" stroke-width="2"/>
+    <line x1="0" y1="0" x2="0" y2="300" stroke="#444" stroke-width="2"/>
+    <text x="200" y="340" font-family="system-ui" font-size="14" fill="#666" text-anchor="middle">Cost</text>
+    <text x="-30" y="150" font-family="system-ui" font-size="14" fill="#666" text-anchor="middle" transform="rotate(-90, -30, 150)">Accuracy</text>
+
+    <!-- Pareto frontier curve -->
+    <path d="M30,40 Q100,50 150,100 Q200,150 250,220 Q300,260 380,280" stroke="url(#pareto)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+    <!-- Frontier points -->
+    <circle cx="30" cy="40" r="12" fill="#3b82f6"/>
+    <text x="30" y="20" font-family="system-ui" font-size="11" fill="#888" text-anchor="middle">GPT-4</text>
+
+    <circle cx="150" cy="100" r="12" fill="#8b5cf6"/>
+    <text x="150" y="80" font-family="system-ui" font-size="11" fill="#888" text-anchor="middle">Claude</text>
+
+    <!-- SLM star point -->
+    <circle cx="350" cy="120" r="16" fill="url(#slm)"/>
+    <text x="350" y="100" font-family="system-ui" font-size="13" fill="#f59e0b" text-anchor="middle" font-weight="bold">SLM</text>
+
+    <!-- 100x arrow -->
+    <path d="M280,200 L330,140" stroke="#10b981" stroke-width="2" stroke-dasharray="4"/>
+    <text x="290" y="180" font-family="system-ui" font-size="12" fill="#10b981" font-weight="bold">100x cheaper</text>
+  </g>
+
+  <!-- Visual comparison -->
+  <g transform="translate(750, 200)">
+    <!-- Large model -->
+    <circle cx="0" cy="80" r="60" fill="#3b82f6" opacity="0.3"/>
+    <circle cx="0" cy="80" r="50" fill="#3b82f6" opacity="0.5"/>
+    <circle cx="0" cy="80" r="40" fill="#3b82f6" opacity="0.7"/>
+    <text x="0" y="88" font-family="system-ui" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">100B</text>
+
+    <!-- Arrow -->
+    <path d="M80,80 L160,80" stroke="#fff" stroke-width="3" opacity="0.6"/>
+    <path d="M150,70 L165,80 L150,90" fill="#fff" opacity="0.6"/>
+
+    <!-- Small model -->
+    <circle cx="220" cy="80" r="25" fill="url(#slm)"/>
+    <text x="220" y="86" font-family="system-ui" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">100M</text>
+
+    <!-- Labels -->
+    <text x="0" y="170" font-family="system-ui" font-size="14" fill="#666" text-anchor="middle">Frontier Model</text>
+    <text x="220" y="170" font-family="system-ui" font-size="14" fill="#666" text-anchor="middle">Distilled SLM</text>
+  </g>
+
+  <!-- Title -->
+  <text x="640" y="500" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="700" fill="#fff" text-anchor="middle">single-shot-eval</text>
+  <text x="640" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#888" text-anchor="middle">SLM Pareto Frontier Evaluation Framework</text>
+  <text x="640" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#10b981" text-anchor="middle">1% worse accuracy | 100x smaller | FREE</text>
+</svg>

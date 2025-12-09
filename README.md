@@ -1,12 +1,18 @@
-# single-shot-eval
+<div align="center">
+  <img src="docs/hero.svg" alt="single-shot-eval" width="800">
 
-[![CI](https://github.com/paiml/single-shot-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/single-shot-eval/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
+  # single-shot-eval
 
-**SLM Pareto Frontier Evaluation Framework** - OFFLINE-FIRST evaluation using Batuta sovereign stack.
+  **SLM Pareto Frontier Evaluation Framework - OFFLINE-FIRST evaluation using Batuta sovereign stack.**
 
-> Prove that small models can beat frontier models on domain-specific tasks at 1/100th the cost.
+  [![CI](https://github.com/paiml/single-shot-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/single-shot-eval/actions/workflows/ci.yml)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
+</div>
+
+---
+
+Prove that small models can beat frontier models on domain-specific tasks at 1/100th the cost. Part of the [PAIML Stack](https://github.com/paiml).
 
 ## Core Thesis
 
