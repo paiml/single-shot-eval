@@ -313,3 +313,26 @@ roadmap:
   - clippy
   - tests
   notes: Makefile uses -D clippy::unwrap_used which requires expect() instead of unwrap()
+- id: SSE-017
+  github_issue: null
+  item_type: task
+  title: Enforce 95% coverage threshold (trueno pattern)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Add coverage-check target with Python enforcement
+  - Use sys.exit(1) to block on coverage failure
+  - Set threshold to 95% (EXTREME TDD standard)
+  - Follow trueno Makefile patterns
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - quality
+  - coverage
+  - enforcement
+  notes: Current coverage is 89.22% - needs improvement to pass threshold

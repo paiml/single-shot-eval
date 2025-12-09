@@ -151,19 +151,10 @@ coverage-ci: ## Generate LCOV report for CI/CD
 	@cargo llvm-cov report --lcov --output-path lcov.info --ignore-filename-regex 'main\.rs'
 	@echo "✓ Coverage report generated: lcov.info"
 
-# Check coverage meets threshold
-coverage-check: ## Verify coverage meets threshold
-	@echo "Checking coverage against $(COVERAGE_THRESHOLD)% threshold..."
-	@COVERAGE=$$(cargo llvm-cov report --summary-only --ignore-filename-regex 'main\.rs' 2>/dev/null | grep -E "^TOTAL" | awk '{print $$10}' | tr -d '%' || echo "0"); \
-	if [ -z "$$COVERAGE" ] || [ "$$COVERAGE" = "0" ]; then \
-		echo "⚠️  No coverage data. Run 'make coverage' first."; \
-		exit 1; \
-	elif [ $$(echo "$$COVERAGE < $(COVERAGE_THRESHOLD)" | bc -l) = "1" ]; then \
-		echo "❌ Coverage $$COVERAGE% below $(COVERAGE_THRESHOLD)% threshold"; \
-		exit 1; \
-	else \
-		echo "✅ Coverage $$COVERAGE% meets $(COVERAGE_THRESHOLD)% threshold"; \
-	fi
+# Check coverage meets threshold (trueno pattern: Python enforcement with sys.exit)
+coverage-check: ## Enforce 95% coverage threshold (BLOCKS on failure)
+	@echo "🔒 Enforcing $(COVERAGE_THRESHOLD)% coverage threshold..."
+	@cargo llvm-cov report --ignore-filename-regex 'main\.rs' 2>/dev/null | python3 -c "import sys; lines = list(sys.stdin); total_line = [l for l in lines if l.startswith('TOTAL')]; exec('if not total_line: print(chr(9888) + chr(65039) + \" No coverage data. Run make coverage first.\"); sys.exit(1)') if not total_line else None; parts = total_line[0].split(); covered = int(parts[7]) - int(parts[8]); total = int(parts[7]); pct = 100 * covered / total if total > 0 else 0; print(f'Coverage: {pct:.2f}% ({covered:,}/{total:,} lines)'); threshold = $(COVERAGE_THRESHOLD); sys.exit(1) if pct < threshold and print(f'❌ FAIL: Coverage {pct:.2f}% below {threshold}% threshold') is None else print(f'✅ Coverage threshold met (≥{threshold}%)')"
 
 # Clean coverage artifacts
 coverage-clean: ## Clean coverage artifacts
