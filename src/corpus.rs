@@ -2,11 +2,18 @@
 //!
 //! Loads Python examples from the `reprorusted-python-cli` corpus for
 //! evaluation against SLM and `SaaS` baselines.
+//!
+//! Supports two formats:
+//! - Directory-based: `example_*` directories with `.py` files
+//! - JSONL-based: `transpile_corpus.jsonl` with structured examples
 
 #![allow(clippy::doc_markdown)]
 #![allow(clippy::missing_const_for_fn)]
 
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -24,6 +31,29 @@ pub enum CorpusError {
 
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
+
+    #[error("JSON parse error: {0}")]
+    JsonError(#[from] serde_json::Error),
+}
+
+/// A test case for a Python function (from JSONL format)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TestCase {
+    /// Input arguments
+    pub input: Vec<serde_json::Value>,
+    /// Expected output
+    pub expected: serde_json::Value,
+}
+
+/// A JSONL corpus entry
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JsonlEntry {
+    /// Example ID
+    pub id: String,
+    /// Python source code
+    pub python_code: String,
+    /// Test cases
+    pub test_cases: Vec<TestCase>,
 }
 
 /// A single Python example from the corpus
@@ -39,6 +69,8 @@ pub struct PythonExample {
     pub tests: Option<String>,
     /// All Python files in the example
     pub files: HashMap<String, String>,
+    /// Structured test cases (from JSONL format)
+    pub test_cases: Vec<TestCase>,
 }
 
 impl PythonExample {
@@ -69,11 +101,15 @@ pub struct Corpus {
 }
 
 impl Corpus {
-    /// Load corpus from directory path
+    /// Load corpus from directory path or JSONL file
+    ///
+    /// Supports two formats:
+    /// - Directory with `example_*` subdirectories containing `.py` files
+    /// - JSONL file with structured examples (e.g., `transpile_corpus.jsonl`)
     ///
     /// # Errors
     ///
-    /// Returns an error if the directory doesn't exist or contains no examples.
+    /// Returns an error if the path doesn't exist or contains no examples.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, CorpusError> {
         let root = path.as_ref().to_path_buf();
 
@@ -81,9 +117,67 @@ impl Corpus {
             return Err(CorpusError::NotFound(root.display().to_string()));
         }
 
+        // Check if path is a JSONL file or directory containing JSONL
+        if root.is_file() && root.extension().is_some_and(|e| e == "jsonl") {
+            return Self::load_jsonl(&root);
+        }
+
+        // Check for JSONL file in directory
+        let jsonl_path = root.join("transpile_corpus.jsonl");
+        if jsonl_path.exists() {
+            return Self::load_jsonl(&jsonl_path);
+        }
+
+        // Fall back to directory-based loading
+        Self::load_directory(&root)
+    }
+
+    /// Load corpus from JSONL file
+    fn load_jsonl(path: &Path) -> Result<Self, CorpusError> {
+        let file = File::open(path)?;
+        let reader = BufReader::new(file);
         let mut examples = Vec::new();
 
-        for entry in std::fs::read_dir(&root)? {
+        for line in reader.lines() {
+            let line = line?;
+            if line.trim().is_empty() {
+                continue;
+            }
+
+            let entry: JsonlEntry = serde_json::from_str(&line)?;
+
+            let mut files = HashMap::new();
+            let filename = format!("{}.py", entry.id);
+            files.insert(filename.clone(), entry.python_code.clone());
+
+            examples.push(PythonExample {
+                name: entry.id.clone(),
+                path: path.to_path_buf(),
+                source: entry.python_code,
+                tests: None, // Tests are in test_cases instead
+                files,
+                test_cases: entry.test_cases,
+            });
+        }
+
+        if examples.is_empty() {
+            return Err(CorpusError::Empty);
+        }
+
+        // Sort by name for reproducibility
+        examples.sort_by(|a, b| a.name.cmp(&b.name));
+
+        Ok(Self {
+            root: path.parent().unwrap_or(path).to_path_buf(),
+            examples,
+        })
+    }
+
+    /// Load corpus from directory with example_* subdirectories
+    fn load_directory(root: &Path) -> Result<Self, CorpusError> {
+        let mut examples = Vec::new();
+
+        for entry in std::fs::read_dir(root)? {
             let entry = entry?;
             let path = entry.path();
 
@@ -105,7 +199,10 @@ impl Corpus {
         // Sort by name for reproducibility
         examples.sort_by(|a, b| a.name.cmp(&b.name));
 
-        Ok(Self { root, examples })
+        Ok(Self {
+            root: root.to_path_buf(),
+            examples,
+        })
     }
 
     /// Load a single example from its directory
@@ -155,6 +252,7 @@ impl Corpus {
             source,
             tests,
             files,
+            test_cases: Vec::new(), // Directory-based format doesn't have structured test cases
         })
     }
 
