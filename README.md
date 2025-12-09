@@ -45,9 +45,11 @@ cargo build --release
 cargo install --path .
 ```
 
-## CLI Usage
+## Usage
 
-### Run Evaluation Suite
+### CLI
+
+#### Run Evaluation Suite
 
 ```bash
 # Evaluate .apr models against task configurations
@@ -65,7 +67,7 @@ single-shot-eval evaluate \
   --baselines claude,gemini
 ```
 
-### Verify Rust Code
+#### Verify Rust Code
 
 ```bash
 # Check if generated Rust compiles
@@ -75,21 +77,21 @@ single-shot-eval verify --source output.rs
 single-shot-eval verify --source output.rs --tests tests.rs
 ```
 
-### Corpus Statistics
+#### Corpus Statistics
 
 ```bash
 # Show Python corpus statistics
 single-shot-eval corpus-stats --path ./reprorusted-python-cli
 ```
 
-### Generate Reports
+#### Generate Reports
 
 ```bash
 # Generate Pareto frontier report
 single-shot-eval report --input ./results --output report.md
 ```
 
-## Library Usage
+### Library
 
 ```rust
 use single_shot_eval::{
@@ -208,6 +210,16 @@ tasks/
 tests/
   integration.rs # End-to-end tests
 ```
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch from `main`
+3. Run `make lint` and `make test` before submitting
+4. Ensure all tests pass and clippy reports no warnings
+5. Submit a pull request
 
 ## License
 
