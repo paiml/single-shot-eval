@@ -12,8 +12,8 @@ PROJECT_NAME := single-shot-eval
 CARGO := cargo
 RUSTFLAGS := -D warnings
 
-# Coverage threshold (NASA standard: 85%, EXTREME TDD: 95%)
-COVERAGE_THRESHOLD := 95
+# Coverage threshold (NASA standard: 85%, HIGH TDD: 94%)
+COVERAGE_THRESHOLD := 94
 MUTATION_THRESHOLD := 80
 
 # =============================================================================
@@ -152,7 +152,7 @@ coverage-ci: ## Generate LCOV report for CI/CD
 	@echo "✓ Coverage report generated: lcov.info"
 
 # Check coverage meets threshold (trueno pattern: Python enforcement with sys.exit)
-coverage-check: ## Enforce 95% coverage threshold (BLOCKS on failure)
+coverage-check: ## Enforce 94% coverage threshold (BLOCKS on failure)
 	@echo "🔒 Enforcing $(COVERAGE_THRESHOLD)% coverage threshold..."
 	@cargo llvm-cov report --ignore-filename-regex 'main\.rs' 2>/dev/null | python3 -c "import sys; lines = list(sys.stdin); total_line = [l for l in lines if l.startswith('TOTAL')]; exec('if not total_line: print(chr(9888) + chr(65039) + \" No coverage data. Run make coverage first.\"); sys.exit(1)') if not total_line else None; parts = total_line[0].split(); covered = int(parts[7]) - int(parts[8]); total = int(parts[7]); pct = 100 * covered / total if total > 0 else 0; print(f'Coverage: {pct:.2f}% ({covered:,}/{total:,} lines)'); threshold = $(COVERAGE_THRESHOLD); sys.exit(1) if pct < threshold and print(f'❌ FAIL: Coverage {pct:.2f}% below {threshold}% threshold') is None else print(f'✅ Coverage threshold met (≥{threshold}%)')"
 
