@@ -319,13 +319,13 @@ impl TaskLoader {
 
     /// Get the number of loaded tasks
     #[must_use]
-    pub const fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.tasks.len()
     }
 
     /// Check if no tasks are loaded
     #[must_use]
-    pub const fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.tasks.is_empty()
     }
 

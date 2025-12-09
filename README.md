@@ -47,6 +47,18 @@ Pareto Frontier Analysis
 Report (Princeton-compliant: 5 runs, 95% CI)
 ```
 
+## Requirements
+
+### Hardware
+- **CPU**: Any x86_64 or ARM64 processor
+- **RAM**: Minimum 4GB (8GB recommended for large corpora)
+- **Disk**: ~100MB for build artifacts
+
+### Software
+- **Rust**: 1.75+ (MSRV specified in Cargo.toml)
+- **OS**: Linux (tested on Ubuntu 22.04), macOS, Windows
+- **Optional**: `claude` CLI, `gemini` CLI for baseline comparisons
+
 ## Installation
 
 ```bash
@@ -221,6 +233,24 @@ Trade-off analysis identifies models that are:
 - On the Pareto frontier (not dominated)
 - Dominated (better alternatives exist)
 - Value leaders (best accuracy/cost ratio)
+
+### Inference Parameters
+
+Default inference parameters (configurable in task YAML):
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `temperature` | 0.0 | Deterministic sampling for reproducibility |
+| `max_tokens` | 4096 | Maximum output tokens |
+| `timeout_ms` | 30000 | Per-example timeout |
+| `runs` | 5 | Minimum runs for statistical validity |
+
+### Known Limitations
+
+- **Demo variance**: Bootstrap CI values may vary slightly between runs due to random sampling (expected behavior)
+- **Baseline CLIs**: External `claude`/`gemini` CLI tools must be installed and authenticated separately
+- **Corpus size**: Very large corpora (>10K examples) may require increased memory
+- **GPU support**: Not required; all inference uses CPU-optimized Batuta stack
 
 ## Offline-First Architecture
 

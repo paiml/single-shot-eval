@@ -433,3 +433,26 @@ roadmap:
   - docs
   - github-pages
   notes: Following trueno pattern for docs deployment
+- id: SSE-022
+  github_issue: null
+  item_type: task
+  title: Address 100-point QA checklist gaps
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Add rust-version = "1.75" to Cargo.toml (CR-001)
+  - Add hardware requirements to README (EP-013, CR-004)
+  - Document inference parameters (EP-012, ME-004)
+  - Add known limitations section (RR-005)
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - qa
+  - documentation
+  - reproducibility
+  notes: Addresses gaps identified in 100-point scientific reproducibility checklist

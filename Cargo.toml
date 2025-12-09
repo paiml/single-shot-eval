@@ -2,6 +2,7 @@
 name = "single-shot-eval"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.75"
 authors = ["PAIML <engineering@paiml.com>"]
 description = "SLM Pareto Frontier Evaluation Framework - OFFLINE-FIRST evaluation using Batuta sovereign stack"
 license = "MIT"
