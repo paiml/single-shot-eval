@@ -360,3 +360,26 @@ roadmap:
   - coverage
   - tests
   notes: Coverage increased from 89.22% to 94.82% using batuta stack integration tests
+- id: SSE-019
+  github_issue: null
+  item_type: task
+  title: Add PMAT quality gates and enhance CI pipeline
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Add .pmat-gates.toml with quality thresholds
+  - Add coverage reporting to CI (Codecov)
+  - Add security audit job (cargo audit)
+  - Add matrix builds for multi-platform testing
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - ci
+  - quality
+  - pmat
+  notes: Repo score improved from 85.5 to 94.0 (Grade A)

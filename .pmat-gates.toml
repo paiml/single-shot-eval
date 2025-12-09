@@ -1,0 +1,42 @@
+# PMAT Quality Gates Configuration
+# https://github.com/paiml/paiml-mcp-agent-toolkit
+
+[gates]
+# Coverage threshold (enforced by Makefile)
+coverage_threshold = 94
+
+# Complexity thresholds
+max_cyclomatic_complexity = 15
+max_cognitive_complexity = 20
+
+# Code quality
+max_function_lines = 100
+max_file_lines = 500
+
+[lint]
+# Clippy configuration
+clippy_deny = ["warnings"]
+clippy_allow = [
+    "clippy::cast_precision_loss",
+    "clippy::cast_possible_truncation",
+    "clippy::cast_sign_loss",
+    "clippy::float_cmp",
+    "clippy::many_single_char_names",
+]
+
+[security]
+# Audit configuration
+audit_enabled = true
+audit_deny = ["unmaintained", "unsound"]
+
+[testing]
+# Property-based testing
+proptest_cases = 100
+# Mutation testing threshold (when enabled)
+mutation_threshold = 70
+
+[documentation]
+# Documentation requirements
+require_readme = true
+require_license = true
+require_contributing = true
