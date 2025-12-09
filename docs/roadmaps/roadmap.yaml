@@ -184,7 +184,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Python-to-Rust experiment corpus and JSONL support
-  status: in_progress
+  status: completed
   priority: high
   assigned_to: null
   created: 2025-12-09T00:00:00Z
