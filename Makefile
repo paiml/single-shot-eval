@@ -108,7 +108,8 @@ coverage: ## Generate HTML coverage report and summary
 	@echo "⚙️  Temporarily disabling global cargo config (mold breaks coverage)..."
 	@test -f ~/.cargo/config.toml && mv ~/.cargo/config.toml ~/.cargo/config.toml.cov-backup || true
 	@echo "🧪 Phase 1: Running tests with instrumentation (no report)..."
-	@cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace
+	@echo "   (excluding slow baseline tests for <60s target)"
+	@cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace -E 'not test(/test_run_with_baselines/)'
 	@echo "📊 Phase 2: Generating coverage reports..."
 	@echo "   (excluding main.rs - CLI entry point not under test)"
 	@cargo llvm-cov report --html --output-dir target/coverage/html --ignore-filename-regex 'main\.rs'
