@@ -149,7 +149,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: Real Aprender model loading and inference
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 1970-01-01T00:00:00Z

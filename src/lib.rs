@@ -39,6 +39,7 @@ pub mod baselines;
 pub mod compiler;
 pub mod config;
 pub mod corpus;
+pub mod inference;
 pub mod metrics;
 pub mod pareto;
 pub mod report;
@@ -55,6 +56,10 @@ pub use compiler::{
     BatchResult, BatchVerifier, CompilerConfig, CompilerError, CompilerVerifier, VerificationResult,
 };
 pub use corpus::{Corpus, CorpusError, CorpusStats, PythonExample};
+pub use inference::{
+    create_placeholder_model, InferenceError, InferenceOutput, LoadedModel, ModelConfig,
+    ModelLoader, ModelMetadata,
+};
 pub use metrics::{
     bonferroni_correction, bootstrap_ci, paired_t_test, welch_t_test, AggregatedMetrics,
     MetricsCollector, SignificanceResult, StatConfig,
