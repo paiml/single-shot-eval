@@ -265,3 +265,29 @@ roadmap:
   - docs
   - examples
   notes: Documents SSE-012 and SSE-013 functionality
+- id: SSE-015
+  github_issue: null
+  item_type: task
+  title: Expand corpus to cover all 10 Py2Rs benchmark levels
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Add Hello level examples (simple print statements)
+  - Add Collections level examples (list comprehensions)
+  - Add ErrorHandling level examples (try/except)
+  - Add OopTraits level examples (classes with methods)
+  - Add Concurrency level examples (async/await)
+  - Add Metaprogramming level examples (decorators, dataclasses)
+  - Maintain existing corpus examples for Variables, Functions, ControlFlow
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - corpus
+  - benchmark
+  - py2rs
+  notes: Expands corpus from 20 to 40+ examples covering all Py2Rs difficulty levels
