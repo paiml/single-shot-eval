@@ -925,6 +925,7 @@ fn test_available_baselines_function() {
 }
 
 #[test]
+#[ignore] // Slow: calls external baseline CLIs (claude, gemini)
 fn test_run_all_baselines_function() {
     use single_shot_eval::run_all_baselines;
 
@@ -1055,6 +1056,7 @@ fn test_runner_run_evaluation_multiple_models() {
 }
 
 #[test]
+#[ignore] // Slow: calls external baseline CLIs (claude, gemini)
 fn test_runner_with_baselines_enabled() {
     use single_shot_eval::{TaskRunner, RunnerConfig};
     use single_shot_eval::config::{TaskConfig, TaskDefinition, EvaluationSettings, MetricType, PromptConfig, GroundTruthConfig};
