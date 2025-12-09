@@ -13,8 +13,8 @@ categories = ["command-line-utilities", "science"]
 # =============================================================================
 # BATUTA SOVEREIGN STACK (crates.io ONLY - NO git dependencies)
 # =============================================================================
-# Core ML library - .apr format, inference, metrics
-aprender = "0.15"
+# Core ML library - .apr format, inference, metrics, bench
+aprender = "0.16"
 # Training/distillation/conversion library
 entrenar = "0.2"
 

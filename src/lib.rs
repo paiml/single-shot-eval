@@ -36,6 +36,7 @@
 //! ```
 
 pub mod baselines;
+pub mod bench_bridge;
 pub mod compiler;
 pub mod config;
 pub mod corpus;
@@ -71,4 +72,12 @@ pub use report::{FullReport, ModelReport, ReportBuilder, ReportMetadata, ReportS
 pub use runner::{
     BaselineEvalResult, EvalSample, EvaluationReport, InferenceResult, RunnerConfig, RunnerError,
     TaskRunner,
+};
+
+// Re-export aprender::bench integration (SSE-012)
+pub use bench_bridge::{
+    batch_to_bench_examples, classify_example_level, create_model_comparison, infer_difficulty,
+    level_to_example_pattern, to_bench_example, BenchEvalResult, BenchExample,
+    BenchExampleResult, Difficulty, EvalSuiteConfig, EvalTask, ExampleStatus, LevelResult,
+    ModelComparison, ParetoPoint, Py2RsLevel, Py2RsScore, Recommendation,
 };

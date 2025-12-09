@@ -168,7 +168,25 @@ dependencies = [
  "rmp-serde",
  "serde",
  "serde_json",
- "trueno 0.8.0",
+ "trueno 0.8.1",
+]
+
+[[package]]
+name = "aprender"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0465726d912d2d3bfab09b25325f8330d8837c79f642fd80f6e38dbc94fe33eb"
+dependencies = [
+ "bincode",
+ "getrandom 0.2.16",
+ "memmap2",
+ "rand 0.8.5",
+ "rand_chacha 0.3.1",
+ "rayon",
+ "rmp-serde",
+ "serde",
+ "serde_json",
+ "trueno 0.8.1",
 ]
 
 [[package]]
@@ -1039,7 +1057,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aff2e68fc53a6351069b92f34afab36c41b6965c22f88746606ec243934f8c4"
 dependencies = [
  "alimentar",
- "aprender",
+ "aprender 0.15.0",
  "bytemuck",
  "chrono",
  "clap",
@@ -1059,7 +1077,7 @@ dependencies = [
  "sha2",
  "thiserror 2.0.17",
  "toml",
- "trueno 0.8.0",
+ "trueno 0.8.1",
  "trueno-viz",
  "zip",
 ]
@@ -2997,7 +3015,7 @@ name = "single-shot-eval"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "aprender",
+ "aprender 0.16.0",
  "chrono",
  "clap",
  "criterion",
@@ -3528,9 +3546,9 @@ dependencies = [
 
 [[package]]
 name = "trueno"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f127ae5346273b160eb01480022bd70a46207ed9ff54b534b78c27977390dc52"
+checksum = "74c75705b4166e5bbfdf986abe7051af798832d66c0f4c3581bae4686b0c4e25"
 dependencies = [
  "thiserror 2.0.17",
 ]

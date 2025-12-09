@@ -198,3 +198,26 @@ roadmap:
   - experiments
   - corpus
   notes: null
+- id: SSE-012
+  github_issue: null
+  item_type: task
+  title: Integrate aprender::bench module for Py2Rs evaluation
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Re-export aprender::bench types (Difficulty, Example, ModelComparison)
+  - Bridge corpus.rs to use aprender::bench::py2rs::Py2RsLevel
+  - Use aprender::bench::ModelComparison for Pareto analysis
+  - Maintain backward compatibility with existing API
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - integration
+  - aprender
+  - bench
+  notes: Uses aprender's canonical 10-level Py2Rs benchmark framework
