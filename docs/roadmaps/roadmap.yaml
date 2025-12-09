@@ -336,3 +336,27 @@ roadmap:
   - coverage
   - enforcement
   notes: Current coverage is 89.22% - needs improvement to pass threshold
+- id: SSE-018
+  github_issue: null
+  item_type: task
+  title: Increase test coverage from 89% to 95%
+  status: in_progress
+  priority: critical
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Identify uncovered code paths with cargo llvm-cov report
+  - Add tests for runner.rs uncovered branches
+  - Add tests for report.rs uncovered branches
+  - Add tests for pareto.rs edge cases
+  - Pass make coverage-check (95% threshold)
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - quality
+  - coverage
+  - tests
+  notes: Gap is ~180 lines (333 uncovered of 3089 total)
