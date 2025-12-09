@@ -1,6 +1,12 @@
 # single-shot-eval
 
-SLM Pareto Frontier Evaluation Framework - OFFLINE-FIRST evaluation using Batuta sovereign stack.
+[![CI](https://github.com/paiml/single-shot-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/single-shot-eval/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
+
+**SLM Pareto Frontier Evaluation Framework** - OFFLINE-FIRST evaluation using Batuta sovereign stack.
+
+> Prove that small models can beat frontier models on domain-specific tasks at 1/100th the cost.
 
 ## Core Thesis
 
