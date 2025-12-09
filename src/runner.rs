@@ -388,6 +388,7 @@ fn estimate_cost(model_id: &str, _latency: Duration) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use crate::config::{

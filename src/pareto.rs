@@ -176,6 +176,7 @@ pub fn analyze_pareto(results: &[EvalResult]) -> ParetoAnalysis {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

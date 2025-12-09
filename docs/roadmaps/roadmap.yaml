@@ -291,3 +291,25 @@ roadmap:
   - benchmark
   - py2rs
   notes: Expands corpus from 20 to 40+ examples covering all Py2Rs difficulty levels
+- id: SSE-016
+  github_issue: null
+  item_type: task
+  title: Fix clippy unwrap_used warnings in test code
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Replace all .unwrap() with .expect() in test modules
+  - Replace all .unwrap_err() with .expect_err() in test modules
+  - Pass make lint && make test-fast
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - quality
+  - clippy
+  - tests
+  notes: Makefile uses -D clippy::unwrap_used which requires expect() instead of unwrap()

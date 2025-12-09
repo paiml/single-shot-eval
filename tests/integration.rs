@@ -10,6 +10,7 @@
 #![allow(clippy::needless_raw_string_hashes)]
 #![allow(clippy::uninlined_format_args)]
 #![allow(clippy::suboptimal_flops)]
+#![allow(clippy::unwrap_used)]
 
 use single_shot_eval::{
     analyze_pareto, compute_pareto_frontier, BatchVerifier, CompilerConfig, CompilerVerifier,

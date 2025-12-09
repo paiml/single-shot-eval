@@ -410,6 +410,7 @@ pub fn create_placeholder_model(id: &str) -> LoadedModel {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

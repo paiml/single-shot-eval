@@ -382,7 +382,8 @@ pub struct AggregatedMetrics {
     clippy::float_cmp,
     clippy::suboptimal_flops,
     clippy::cast_precision_loss,
-    clippy::cast_lossless
+    clippy::cast_lossless,
+    clippy::unwrap_used
 )]
 mod tests {
     use super::*;

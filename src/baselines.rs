@@ -223,6 +223,7 @@ pub fn run_all_baselines(prompt: &str) -> Vec<Result<BaselineResult, BaselineErr
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

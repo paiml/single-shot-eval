@@ -617,7 +617,7 @@ impl FullReport {
 }
 
 #[cfg(test)]
-#[allow(clippy::suboptimal_flops, clippy::cast_lossless)]
+#[allow(clippy::suboptimal_flops, clippy::cast_lossless, clippy::unwrap_used)]
 mod tests {
     use super::*;
     use std::time::Duration;

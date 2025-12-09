@@ -1,7 +1,10 @@
-//! Demo: Py2Rs 10-level benchmark classification
+//! Demo: `Py2Rs` 10-level benchmark classification
 //!
-//! Shows how to use the bench_bridge module to classify Python examples
-//! against the canonical aprender Py2Rs benchmark framework.
+//! Shows how to use the `bench_bridge` module to classify Python examples
+//! against the canonical aprender `Py2Rs` benchmark framework.
+
+#![allow(clippy::needless_raw_string_hashes)]
+#![allow(clippy::uninlined_format_args)]
 
 use single_shot_eval::{infer_difficulty, Difficulty, Py2RsLevel};
 
