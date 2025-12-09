@@ -96,6 +96,34 @@ single-shot-eval verify --source output.rs --tests tests.rs
 single-shot-eval corpus-stats --path ./reprorusted-python-cli
 ```
 
+#### Benchmark Corpus
+
+```bash
+# Analyze Python corpus with Py2Rs 10-level classification
+single-shot-eval benchmark --corpus ./experiments/python-corpus/
+
+# With detailed per-example breakdown
+single-shot-eval benchmark --corpus ./experiments/python-corpus/ --verbose
+```
+
+Output shows level distribution, difficulty breakdown, and visual coverage:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Py2Rs 10-Level Benchmark Analysis                              │
+├────────────────────────────────────────────────────────────────┤
+│ Corpus:   50 examples                                          │
+└────────────────────────────────────────────────────────────────┘
+
+Level Distribution
+──────────────────
+L3  (Functions)      [████░░░░░░░░░░░░░░░░]  40% (20 examples)
+L5  (ControlFlow)    [███░░░░░░░░░░░░░░░░░]  30% (15 examples)
+...
+
+Visual Summary (● = has examples, ○ = empty)
+Levels 1-10: ○○●●●●○○○○
+```
+
 #### Generate Reports
 
 ```bash
@@ -207,20 +235,25 @@ This framework uses the **Batuta sovereign stack**:
 
 ```
 src/
-  lib.rs        # Library exports
-  main.rs       # CLI entry point
-  baselines.rs  # SaaS baseline wrappers
-  compiler.rs   # Rust verification
-  config.rs     # Task YAML parsing
-  corpus.rs     # Python corpus handling
-  metrics.rs    # Statistical analysis
-  pareto.rs     # Pareto frontier computation
-  report.rs     # Report generation
-  runner.rs     # Evaluation orchestration
+  lib.rs          # Library exports
+  main.rs         # CLI entry point
+  baselines.rs    # SaaS baseline wrappers
+  bench_bridge.rs # aprender::bench integration (Py2Rs 10-level)
+  compiler.rs     # Rust verification
+  config.rs       # Task YAML parsing
+  corpus.rs       # Python corpus handling
+  inference.rs    # Model loading & inference
+  metrics.rs      # Statistical analysis
+  pareto.rs       # Pareto frontier computation
+  report.rs       # Report generation
+  runner.rs       # Evaluation orchestration
+examples/
+  demo.rs         # Pareto analysis demo
+  benchmark.rs    # Py2Rs benchmark classification demo
 tasks/
-  *.yaml        # Task configurations
+  *.yaml          # Task configurations
 tests/
-  integration.rs # End-to-end tests
+  integration.rs  # End-to-end tests
 ```
 
 ## Contributing

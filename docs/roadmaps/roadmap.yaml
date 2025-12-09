@@ -244,3 +244,24 @@ roadmap:
   - benchmark
   - py2rs
   notes: Leverages SSE-012 bench_bridge module
+- id: SSE-014
+  github_issue: null
+  item_type: task
+  title: Add benchmark example and update README documentation
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Create benchmark.rs example demonstrating Py2Rs classification
+  - Update README with benchmark CLI usage examples
+  - Update project structure documentation
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - docs
+  - examples
+  notes: Documents SSE-012 and SSE-013 functionality
