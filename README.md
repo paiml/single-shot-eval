@@ -136,6 +136,57 @@ Visual Summary (● = has examples, ○ = empty)
 Levels 1-10: ○○●●●●○○○○
 ```
 
+#### Run Examples
+
+```bash
+# Pareto frontier analysis demo
+cargo run --example demo --release
+
+# Py2Rs benchmark classification demo
+cargo run --example benchmark --release
+```
+
+**Demo Output:**
+```
+=== Single-Shot Eval Demo ===
+
+📊 Computing Pareto Frontier...
+
+Pareto-optimal models:
+  ◆ claude-haiku (acc: 95.0%, cost: $0.2500, lat: 800ms)
+  ◆ slm-100m (acc: 92.0%, cost: $0.0001, lat: 15ms)
+
+📈 Trade-off Analysis...
+  slm-100m trade-off:
+    Accuracy gap: 3.0%
+    Cost ratio: 2500x cheaper
+    Value score: 129333.3x
+
+✅ Demo complete!
+```
+
+**Benchmark Output:**
+```
+=== Py2Rs 10-Level Benchmark Demo ===
+
+Py2Rs Benchmark Levels:
+────────────────────────────────────────────────────────────────
+  L 1 Hello                [Trivial] weight: 1.0
+  L 2 Variables            [Trivial] weight: 1.5
+  L 3 Functions            [Easy] weight: 2.0
+  ...
+  L10 Metaprogramming      [Expert] weight: 20.0
+
+Example Classification:
+────────────────────────────────────────────────────────────────
+  hello           Difficulty: Trivial
+  fibonacci       Difficulty: Easy
+  shape           Difficulty: Hard
+  fetch           Difficulty: Expert
+
+✅ Benchmark demo complete!
+```
+
 #### Generate Reports
 
 ```bash
