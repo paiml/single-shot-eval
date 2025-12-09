@@ -4,9 +4,10 @@
 
 use clap::{Parser, Subcommand};
 use single_shot_eval::{
-    available_baselines, analyze_pareto, CompilerVerifier, Corpus, EvalResult,
-    ReportBuilder, TaskLoader, TaskRunner, RunnerConfig,
+    available_baselines, analyze_pareto, classify_example_level, CompilerVerifier, Corpus,
+    Difficulty, EvalResult, Py2RsLevel, ReportBuilder, RunnerConfig, TaskLoader, TaskRunner,
 };
+use std::collections::HashMap;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
@@ -92,6 +93,17 @@ enum Commands {
         /// Path to corpus directory
         #[arg(long)]
         path: String,
+    },
+
+    /// Analyze corpus with `Py2Rs` 10-level benchmark classification
+    Benchmark {
+        /// Path to corpus directory or JSONL file
+        #[arg(long)]
+        corpus: String,
+
+        /// Show detailed per-example classification
+        #[arg(long)]
+        verbose: bool,
     },
 }
 
@@ -381,6 +393,140 @@ fn main() {
                     if corpus.len() > 10 {
                         println!("  ... and {} more", corpus.len() - 10);
                     }
+                }
+                Err(e) => {
+                    eprintln!("Failed to load corpus: {e}");
+                    std::process::exit(1);
+                }
+            }
+        }
+        Commands::Benchmark { corpus, verbose } => {
+            tracing::info!(
+                corpus = %corpus,
+                verbose = verbose,
+                "Analyzing corpus with Py2Rs 10-level benchmark"
+            );
+
+            match Corpus::load(&corpus) {
+                Ok(corpus_data) => {
+                    println!("┌────────────────────────────────────────────────────────────────┐");
+                    println!("│ Py2Rs 10-Level Benchmark Analysis                              │");
+                    println!("├────────────────────────────────────────────────────────────────┤");
+                    println!("│ Corpus: {:>4} examples                                      │",
+                        corpus_data.len());
+                    println!("└────────────────────────────────────────────────────────────────┘");
+                    println!();
+
+                    // Classify all examples by level
+                    let mut level_counts: HashMap<Py2RsLevel, Vec<String>> = HashMap::new();
+                    let mut difficulty_counts: HashMap<Difficulty, usize> = HashMap::new();
+
+                    for example in corpus_data.iter() {
+                        let level = classify_example_level(example);
+                        let difficulty = level.difficulty();
+
+                        level_counts
+                            .entry(level)
+                            .or_default()
+                            .push(example.name.clone());
+                        *difficulty_counts.entry(difficulty).or_insert(0) += 1;
+                    }
+
+                    // Display level distribution
+                    println!("Level Distribution (Py2Rs 10-Level Framework)");
+                    println!("─────────────────────────────────────────────");
+
+                    for level in Py2RsLevel::all() {
+                        let count = level_counts.get(&level).map_or(0, Vec::len);
+                        let bar_len = (count * 30) / corpus_data.len().max(1);
+                        let bar: String = "█".repeat(bar_len);
+                        let difficulty = level.difficulty();
+                        let weight = level.weight();
+
+                        println!(
+                            "L{:2} {:15} [{:5}] {:30} ({} examples, weight {:.1})",
+                            level.number(),
+                            level.name(),
+                            format!("{difficulty:?}"),
+                            bar,
+                            count,
+                            weight
+                        );
+
+                        if verbose {
+                            if let Some(examples) = level_counts.get(&level) {
+                                for name in examples.iter().take(5) {
+                                    println!("     └─ {name}");
+                                }
+                                if examples.len() > 5 {
+                                    println!("     └─ ... and {} more", examples.len() - 5);
+                                }
+                            }
+                        }
+                    }
+
+                    println!();
+                    println!("Difficulty Breakdown");
+                    println!("────────────────────");
+
+                    let total = corpus_data.len();
+                    for difficulty in Difficulty::all() {
+                        let count = difficulty_counts.get(&difficulty).copied().unwrap_or(0);
+                        let pct = if total > 0 {
+                            (count as f64 / total as f64) * 100.0
+                        } else {
+                            0.0
+                        };
+                        println!(
+                            "{:8} : {:3} examples ({:5.1}%)",
+                            difficulty.name(),
+                            count,
+                            pct
+                        );
+                    }
+
+                    // Compute composite score potential
+                    println!();
+                    println!("Benchmark Coverage");
+                    println!("──────────────────");
+
+                    let total_weight: f32 = Py2RsLevel::all()
+                        .iter()
+                        .map(Py2RsLevel::weight)
+                        .sum();
+
+                    let covered_weight: f32 = Py2RsLevel::all()
+                        .iter()
+                        .filter(|l| level_counts.get(l).is_some_and(|v| !v.is_empty()))
+                        .map(Py2RsLevel::weight)
+                        .sum();
+
+                    let coverage_pct = (covered_weight / total_weight) * 100.0;
+
+                    let covered_levels: Vec<_> = Py2RsLevel::all()
+                        .iter()
+                        .filter(|l| level_counts.get(l).is_some_and(|v| !v.is_empty()))
+                        .map(|l| format!("L{}", l.number()))
+                        .collect();
+
+                    println!("Levels covered: {} / 10", covered_levels.len());
+                    println!("Weight covered: {covered_weight:.1} / {total_weight:.1} ({coverage_pct:.1}%)");
+                    println!("Levels: {}", covered_levels.join(", "));
+
+                    // Visual summary
+                    println!();
+                    println!("Visual Summary (● = has examples, ○ = empty)");
+                    let visual: String = Py2RsLevel::all()
+                        .iter()
+                        .map(|l| {
+                            if level_counts.get(l).is_some_and(|v| !v.is_empty()) {
+                                '●'
+                            } else {
+                                '○'
+                            }
+                        })
+                        .collect();
+                    println!("Levels 1-10: {visual}");
                 }
                 Err(e) => {
                     eprintln!("Failed to load corpus: {e}");

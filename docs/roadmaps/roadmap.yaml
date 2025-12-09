@@ -221,3 +221,26 @@ roadmap:
   - aprender
   - bench
   notes: Uses aprender's canonical 10-level Py2Rs benchmark framework
+- id: SSE-013
+  github_issue: null
+  item_type: task
+  title: CLI benchmark command with Py2Rs 10-level classification
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2025-12-09T00:00:00Z
+  updated: 2025-12-09T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Add benchmark CLI subcommand
+  - Classify corpus examples by Py2RsLevel (1-10)
+  - Display visual summary with level distribution
+  - Show difficulty breakdown (Trivial to Expert)
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - cli
+  - benchmark
+  - py2rs
+  notes: Leverages SSE-012 bench_bridge module
