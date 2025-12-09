@@ -15,11 +15,7 @@ evaluation:
   samples: 50  # From reprorusted corpus
   runs: 5     # Princeton compliance
   timeout_ms: 30000
-  metrics:
-    - accuracy      # pass@1 (compiles + tests pass)
-    - cost          # $/1M tokens
-    - latency_p50   # median latency
-    - latency_p99   # tail latency
+  metric: accuracy  # pass@1 (compiles + tests pass)
 
 prompts:
   system: |
@@ -43,10 +39,8 @@ prompts:
     Return only valid Rust code that compiles.
 
 ground_truth:
-  type: compiler
-  run_tests: true
-  compiler_flags: ["--edition", "2021"]
-  test_timeout_ms: 5000
+  source: "data/corpus/transpile_corpus.jsonl"
+  label_key: "expected"
 
 baselines:
   - id: claude-sonnet
