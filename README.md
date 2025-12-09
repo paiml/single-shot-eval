@@ -347,6 +347,22 @@ Contributions are welcome! Please follow these steps:
 4. Ensure all tests pass and clippy reports no warnings
 5. Submit a pull request
 
+<!-- BENCHMARK_TABLE_START -->
+
+### Pareto Frontier Benchmarks
+
+Performance benchmarks for Pareto frontier computation on varying model counts.
+
+| Benchmark | Models | Time (median) | Lower bound | Upper bound |
+|-----------|--------|---------------|-------------|-------------|
+| `compute_pareto_frontier` | 10 | 60.823 ns | 60.593 ns | 61.074 ns |
+| `compute_pareto_frontier` | 50 | 793.66 ns | 790.15 ns | 797.81 ns |
+| `compute_pareto_frontier` | 100 | 2.9956 µs | 2.9808 µs | 3.0110 µs |
+| `compute_pareto_frontier` | 500 | 100.10 µs | 99.664 µs | 100.54 µs |
+
+_Benchmarks run on noah-Lambda-Vector at 2025-12-09 19:40:00 UTC_
+<!-- BENCHMARK_TABLE_END -->
+
 ## License
 
 MIT
