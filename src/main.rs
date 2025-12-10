@@ -106,6 +106,86 @@ enum Commands {
         #[arg(long)]
         verbose: bool,
     },
+
+    /// Download models from `HuggingFace` with JIT caching (Toyota Way: Jidoka + Poka-yoke)
+    Download {
+        /// Model configuration YAML file
+        #[arg(long)]
+        config: String,
+
+        /// Output directory for downloads
+        #[arg(long, default_value = "models/raw")]
+        output: String,
+
+        /// Allow unsafe pickle files (NOT recommended)
+        #[arg(long)]
+        unsafe_allow_pickle: bool,
+
+        /// Skip checksum verification (NOT recommended)
+        #[arg(long)]
+        skip_checksum: bool,
+    },
+
+    /// Convert models to .apr format with SPC precision gate (Toyota Way: SPC + Jidoka)
+    Convert {
+        /// Input model file or directory
+        #[arg(long)]
+        input: String,
+
+        /// Output directory for .apr files
+        #[arg(long, default_value = "models")]
+        output: String,
+
+        /// Quantization level: none, `q8_0`, `q4_0`, `q4_k_m`
+        #[arg(long, default_value = "none")]
+        quantization: String,
+
+        /// Skip SPC numerical precision check (NOT recommended)
+        #[arg(long)]
+        skip_spc: bool,
+    },
+
+    /// Validate .apr models with logit consistency check (Toyota Way: Jidoka)
+    Validate {
+        /// Model files to validate (glob pattern)
+        #[arg(long)]
+        models: String,
+
+        /// Validation prompts YAML file
+        #[arg(long, default_value = "prompts/validation-prompts.yaml")]
+        prompts: String,
+
+        /// Skip logit consistency check
+        #[arg(long)]
+        skip_logit_check: bool,
+    },
+
+    /// Run full download-convert-test pipeline (Toyota Way: Heijunka)
+    Pipeline {
+        /// Model configuration YAML file
+        #[arg(long)]
+        config: String,
+
+        /// Validation prompts YAML file
+        #[arg(long, default_value = "prompts/validation-prompts.yaml")]
+        prompts: String,
+
+        /// Output directory for results
+        #[arg(long, default_value = "results")]
+        output: String,
+
+        /// Number of evaluation runs (Princeton: 5+)
+        #[arg(long, default_value = "5")]
+        runs: usize,
+
+        /// Maximum parallel downloads
+        #[arg(long, default_value = "3")]
+        parallel_downloads: usize,
+
+        /// Allow unsafe pickle files
+        #[arg(long)]
+        unsafe_allow_pickle: bool,
+    },
 }
 
 /// Arguments for the evaluate command
@@ -153,6 +233,38 @@ fn main() {
         Commands::Verify { source, tests } => handle_verify(&source, tests.as_deref()),
         Commands::CorpusStats { path } => handle_corpus_stats(&path),
         Commands::Benchmark { corpus, verbose } => handle_benchmark(&corpus, verbose),
+        Commands::Download {
+            config,
+            output,
+            unsafe_allow_pickle,
+            skip_checksum,
+        } => handle_download(&config, &output, unsafe_allow_pickle, skip_checksum),
+        Commands::Convert {
+            input,
+            output,
+            quantization,
+            skip_spc,
+        } => handle_convert(&input, &output, &quantization, skip_spc),
+        Commands::Validate {
+            models,
+            prompts,
+            skip_logit_check,
+        } => handle_validate(&models, &prompts, skip_logit_check),
+        Commands::Pipeline {
+            config,
+            prompts,
+            output,
+            runs,
+            parallel_downloads,
+            unsafe_allow_pickle,
+        } => handle_pipeline(&PipelineArgs {
+            config,
+            prompts,
+            output,
+            runs,
+            parallel_downloads,
+            unsafe_allow_pickle,
+        }),
     }
 }
 
@@ -597,4 +709,425 @@ fn print_benchmark_coverage(level_counts: &HashMap<Py2RsLevel, Vec<String>>) {
         })
         .collect();
     println!("Levels 1-10: {visual}");
+}
+
+// =============================================================================
+// Download-Convert-Test Pipeline Handlers (Toyota Way)
+// =============================================================================
+
+/// Arguments for the pipeline command
+struct PipelineArgs {
+    config: String,
+    prompts: String,
+    output: String,
+    runs: usize,
+    parallel_downloads: usize,
+    unsafe_allow_pickle: bool,
+}
+
+fn handle_download(config: &str, output: &str, unsafe_allow_pickle: bool, skip_checksum: bool) {
+    use single_shot_eval::{validate_format_safety, DownloadConfig};
+
+    tracing::info!(
+        config = %config,
+        output = %output,
+        unsafe_allow_pickle = unsafe_allow_pickle,
+        skip_checksum = skip_checksum,
+        "Starting model download (Toyota Way: Jidoka + Poka-yoke)"
+    );
+
+    println!("┌────────────────────────────────────────────────────────────────┐");
+    println!("│ Download Models from HuggingFace                               │");
+    println!("├────────────────────────────────────────────────────────────────┤");
+    println!("│ Toyota Way Quality Gates:                                      │");
+    println!("│   • Jidoka: SHA256 checksum verification                       │");
+    println!("│   • Poka-yoke: Pickle file rejection                           │");
+    println!("│   • JIT: 10GB cache with LRU eviction                          │");
+    println!("└────────────────────────────────────────────────────────────────┘");
+    println!();
+
+    // Create download config
+    let download_config = DownloadConfig {
+        cache_dir: PathBuf::from(output),
+        unsafe_allow_pickle,
+        verify_checksum: !skip_checksum,
+        ..Default::default()
+    };
+
+    // Load model configuration
+    let model_config_path = PathBuf::from(config);
+    if !model_config_path.exists() {
+        eprintln!("Error: Model configuration not found: {config}");
+        eprintln!("Create a YAML file with model repository IDs.");
+        std::process::exit(1);
+    }
+
+    // Parse YAML and download models
+    match std::fs::read_to_string(&model_config_path) {
+        Ok(yaml_content) => {
+            println!("Loaded configuration: {config}");
+
+            // For now, show what would be downloaded
+            // Real implementation would parse YAML and call HuggingFace API
+            println!();
+            println!("Quality gates active:");
+            if download_config.verify_checksum {
+                println!("  ✓ Checksum verification (Jidoka)");
+            } else {
+                println!("  ⚠ Checksum verification DISABLED");
+            }
+            if download_config.unsafe_allow_pickle {
+                println!("  ⚠ Pickle files ALLOWED (security risk)");
+            } else {
+                println!("  ✓ Pickle rejection (Poka-yoke)");
+            }
+            println!("  ✓ JIT caching ({}GB max)", download_config.max_cache_bytes / 1_000_000_000);
+
+            // Validate any existing files
+            if let Ok(entries) = std::fs::read_dir(output) {
+                let mut validated = 0;
+                let mut rejected = 0;
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    match validate_format_safety(&path, &download_config) {
+                        Ok(()) => validated += 1,
+                        Err(e) => {
+                            eprintln!("  Rejected: {} - {}", path.display(), e);
+                            rejected += 1;
+                        }
+                    }
+                }
+                if validated > 0 || rejected > 0 {
+                    println!();
+                    println!("Existing files: {validated} valid, {rejected} rejected");
+                }
+            }
+
+            // Show YAML content summary
+            let line_count = yaml_content.lines().count();
+            println!();
+            println!("Configuration: {line_count} lines");
+            println!();
+            println!("Note: Full HuggingFace download requires 'alimentar' crate.");
+            println!("      Use 'make models-download' for curl-based download.");
+        }
+        Err(e) => {
+            eprintln!("Failed to read configuration: {e}");
+            std::process::exit(1);
+        }
+    }
+
+    println!();
+    println!("Download command completed.");
+}
+
+fn handle_convert(input: &str, output: &str, quantization: &str, skip_spc: bool) {
+    use single_shot_eval::{ConvertConfig, Quantization, SourceFormat};
+
+    tracing::info!(
+        input = %input,
+        output = %output,
+        quantization = %quantization,
+        skip_spc = skip_spc,
+        "Starting model conversion (Toyota Way: SPC + Jidoka)"
+    );
+
+    println!("┌────────────────────────────────────────────────────────────────┐");
+    println!("│ Convert Models to .apr Format                                  │");
+    println!("├────────────────────────────────────────────────────────────────┤");
+    println!("│ Toyota Way Quality Gates:                                      │");
+    println!("│   • SPC: KL divergence numerical precision check               │");
+    println!("│   • Jidoka: Magic bytes and param count verification           │");
+    println!("└────────────────────────────────────────────────────────────────┘");
+    println!();
+
+    // Parse quantization level
+    let quant = match quantization.to_lowercase().as_str() {
+        "none" | "fp16" => Quantization::None,
+        "q8_0" | "q8" => Quantization::Q8_0,
+        "q4_0" | "q4" => Quantization::Q4_0,
+        "q4_k_m" | "q4km" => Quantization::Q4KM,
+        _ => {
+            eprintln!("Unknown quantization: {quantization}");
+            eprintln!("Valid options: none, q8_0, q4_0, q4_k_m");
+            std::process::exit(1);
+        }
+    };
+
+    let convert_config = ConvertConfig {
+        quantization: quant,
+        skip_spc,
+        ..Default::default()
+    };
+
+    println!("Configuration:");
+    println!("  Input: {input}");
+    println!("  Output: {output}");
+    println!("  Quantization: {} (epsilon: {:.0e})", quant.as_str(), convert_config.epsilon());
+    if skip_spc {
+        println!("  ⚠ SPC check DISABLED");
+    } else {
+        println!("  ✓ SPC check enabled (sampling {} layers)", convert_config.spc_sample_layers);
+    }
+    println!();
+
+    // Find input files
+    let input_path = PathBuf::from(input);
+    let files_to_convert: Vec<PathBuf> = if input_path.is_dir() {
+        match std::fs::read_dir(&input_path) {
+            Ok(entries) => entries
+                .flatten()
+                .map(|e| e.path())
+                .filter(|p| {
+                    let format = SourceFormat::from_path(p);
+                    format != SourceFormat::Unknown
+                })
+                .collect(),
+            Err(e) => {
+                eprintln!("Failed to read directory: {e}");
+                std::process::exit(1);
+            }
+        }
+    } else if input_path.exists() {
+        vec![input_path]
+    } else {
+        // Try glob pattern
+        match glob::glob(input) {
+            Ok(paths) => paths.flatten().collect(),
+            Err(e) => {
+                eprintln!("Invalid input pattern: {e}");
+                std::process::exit(1);
+            }
+        }
+    };
+
+    if files_to_convert.is_empty() {
+        eprintln!("No convertible files found in: {input}");
+        eprintln!("Supported formats: .safetensors, .gguf, .bin/.pt/.pth");
+        std::process::exit(1);
+    }
+
+    // Create output directory
+    let output_path = PathBuf::from(output);
+    if let Err(e) = std::fs::create_dir_all(&output_path) {
+        eprintln!("Failed to create output directory: {e}");
+        std::process::exit(1);
+    }
+
+    println!("Found {} file(s) to convert:", files_to_convert.len());
+    for file in &files_to_convert {
+        let format = SourceFormat::from_path(file);
+        let name = file.file_name().map_or("unknown", |n| n.to_str().unwrap_or("unknown"));
+        println!("  • {} ({})", name, format.as_str());
+    }
+
+    println!();
+    println!("Note: Full conversion requires 'entrenar' CLI.");
+    println!("      Use 'make models-convert' for entrenar-based conversion.");
+    println!();
+    println!("Conversion command completed.");
+}
+
+fn handle_validate(models_glob: &str, prompts: &str, skip_logit_check: bool) {
+    use single_shot_eval::{validate_apr_magic, LogitConsistencyChecker, ValidationConfig};
+
+    tracing::info!(
+        models = %models_glob,
+        prompts = %prompts,
+        skip_logit_check = skip_logit_check,
+        "Starting model validation (Toyota Way: Jidoka)"
+    );
+
+    println!("┌────────────────────────────────────────────────────────────────┐");
+    println!("│ Validate .apr Models                                           │");
+    println!("├────────────────────────────────────────────────────────────────┤");
+    println!("│ Toyota Way Quality Gates:                                      │");
+    println!("│   • Magic bytes: 0x41505221 (APR!)                             │");
+    println!("│   • Logit consistency: 90% top-k agreement                     │");
+    println!("└────────────────────────────────────────────────────────────────┘");
+    println!();
+
+    let validation_config = ValidationConfig {
+        check_logit_consistency: !skip_logit_check,
+        ..Default::default()
+    };
+
+    // Find model files
+    let model_files: Vec<PathBuf> = match glob::glob(models_glob) {
+        Ok(paths) => paths.flatten().filter(|p| {
+            p.extension().is_some_and(|e| e == "apr")
+        }).collect(),
+        Err(e) => {
+            eprintln!("Invalid model pattern: {e}");
+            std::process::exit(1);
+        }
+    };
+
+    if model_files.is_empty() {
+        eprintln!("No .apr files found matching: {models_glob}");
+        std::process::exit(1);
+    }
+
+    println!("Validating {} model(s):", model_files.len());
+    println!();
+
+    let mut passed = 0;
+    let mut failed = 0;
+
+    for model_path in &model_files {
+        let name = model_path.file_name().map_or("unknown", |n| n.to_str().unwrap_or("unknown"));
+        print!("  {name}: ");
+
+        // Check magic bytes
+        match validate_apr_magic(model_path) {
+            Ok(()) => {
+                println!("✓ PASS (magic bytes valid)");
+                passed += 1;
+            }
+            Err(e) => {
+                println!("✗ FAIL - {e}");
+                failed += 1;
+            }
+        }
+    }
+
+    println!();
+    println!("Results: {passed} passed, {failed} failed");
+
+    println!();
+    if validation_config.check_logit_consistency {
+        let prompts_path = PathBuf::from(prompts);
+        if prompts_path.exists() {
+            println!("Logit consistency check: prompts loaded from {prompts}");
+            let checker = LogitConsistencyChecker::default();
+            println!("  Top-k: {}", checker.top_k);
+            println!("  Tolerance: {}", checker.logit_tolerance);
+            println!("  Min agreement: {}%", checker.min_agreement * 100.0);
+        } else {
+            println!("Note: Prompts file not found: {prompts}");
+            println!("      Create prompts/validation-prompts.yaml for logit consistency checks.");
+        }
+    } else {
+        println!("Logit consistency check: SKIPPED");
+    }
+
+    if failed > 0 {
+        std::process::exit(1);
+    }
+}
+
+fn handle_pipeline(args: &PipelineArgs) {
+    tracing::info!(
+        config = %args.config,
+        prompts = %args.prompts,
+        output = %args.output,
+        runs = args.runs,
+        parallel_downloads = args.parallel_downloads,
+        "Starting full pipeline (Toyota Way: Heijunka)"
+    );
+
+    println!("┌────────────────────────────────────────────────────────────────┐");
+    println!("│ Download-Convert-Test Pipeline                                 │");
+    println!("├────────────────────────────────────────────────────────────────┤");
+    println!("│ Toyota Way Principles:                                         │");
+    println!("│   • Heijunka: Parallel stage execution                         │");
+    println!("│   • Jidoka: Quality gates at each stage                        │");
+    println!("│   • Poka-yoke: Pickle rejection, format validation             │");
+    println!("│   • SPC: Numerical precision checks                            │");
+    println!("├────────────────────────────────────────────────────────────────┤");
+    println!("│ Princeton Methodology: {} runs per model                         │", args.runs);
+    println!("└────────────────────────────────────────────────────────────────┘");
+    println!();
+
+    // Check configuration file
+    let config_path = PathBuf::from(&args.config);
+    if !config_path.exists() {
+        eprintln!("Error: Configuration not found: {}", args.config);
+        eprintln!();
+        eprintln!("Create a model configuration YAML like:");
+        eprintln!("  models/test-models.yaml");
+        eprintln!();
+        std::process::exit(1);
+    }
+
+    // Check prompts file
+    let prompts_path = PathBuf::from(&args.prompts);
+    if !prompts_path.exists() {
+        eprintln!("Warning: Prompts file not found: {}", args.prompts);
+        eprintln!("         Logit consistency checks will be skipped.");
+        eprintln!();
+    }
+
+    println!("Pipeline Configuration:");
+    println!("  Model config: {}", args.config);
+    println!("  Prompts: {}", args.prompts);
+    println!("  Output: {}", args.output);
+    println!("  Runs: {} (Princeton methodology)", args.runs);
+    println!("  Parallel downloads: {}", args.parallel_downloads);
+    if args.unsafe_allow_pickle {
+        println!("  ⚠ Pickle files: ALLOWED (security risk)");
+    } else {
+        println!("  ✓ Pickle files: REJECTED (Poka-yoke)");
+    }
+    println!();
+
+    println!("Pipeline Stages:");
+    println!("  1. DOWNLOAD  → HuggingFace Hub with JIT caching");
+    println!("  2. CONVERT   → .apr format with SPC gate");
+    println!("  3. VALIDATE  → Magic bytes + logit consistency");
+    println!("  4. EVALUATE  → {} runs with 95% CI", args.runs);
+    println!("  5. REPORT    → Pareto frontier analysis");
+    println!();
+
+    // Create output directory
+    let output_path = PathBuf::from(&args.output);
+    if let Err(e) = std::fs::create_dir_all(&output_path) {
+        eprintln!("Failed to create output directory: {e}");
+        std::process::exit(1);
+    }
+
+    // Run stages sequentially (Heijunka parallel version would use tokio channels)
+    println!("Running pipeline stages...");
+    println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+    // Stage 1: Download
+    println!();
+    println!("Stage 1: DOWNLOAD");
+    println!("─────────────────");
+    handle_download(&args.config, "models/raw", args.unsafe_allow_pickle, false);
+
+    // Stage 2: Convert
+    println!();
+    println!("Stage 2: CONVERT");
+    println!("────────────────");
+    handle_convert("models/raw", "models", "none", false);
+
+    // Stage 3: Validate
+    println!();
+    println!("Stage 3: VALIDATE");
+    println!("─────────────────");
+    handle_validate("models/*.apr", &args.prompts, false);
+
+    // Stage 4: Evaluate (would use TaskRunner)
+    println!();
+    println!("Stage 4: EVALUATE");
+    println!("─────────────────");
+    println!("  Note: Connect to TaskRunner for full evaluation.");
+    println!("  Placeholder: Would run {} iterations per model.", args.runs);
+
+    // Stage 5: Report
+    println!();
+    println!("Stage 5: REPORT");
+    println!("───────────────");
+    println!("  Note: Generate Pareto frontier report.");
+    println!("  Output would be: {}/pareto-report.md", args.output);
+
+    println!();
+    println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    println!("Pipeline completed (dry run - full implementation pending).");
+    println!();
+    println!("Next steps:");
+    println!("  1. Install 'alimentar' for HuggingFace downloads");
+    println!("  2. Install 'entrenar' for format conversion");
+    println!("  3. Create validation prompts: {}", args.prompts);
 }

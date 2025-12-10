@@ -1,0 +1,219 @@
+# Test Models Configuration: Batuta Stack Validation Suite
+# Version: 1.0.0
+# Purpose: HuggingFace models for end-to-end stack validation
+#
+# Based on download-convert-test-spec.md Section 3.2
+# Following MLPerf Inference benchmark categories
+
+metadata:
+  version: "1.0.0"
+  name: "batuta-stack-validation-v1"
+  description: "HuggingFace models for end-to-end stack validation"
+  created: "2025-12-10"
+  research_basis:
+    - "MLPerf Inference Benchmark (Reddi et al., 2020)"
+    - "Princeton AI Agents That Matter (2024)"
+
+# ==============================================================================
+# Model Categories (per MLPerf Inference)
+# ==============================================================================
+# Nano:   10M-50M   - Minimum viable SLM
+# Micro:  50M-150M  - Edge deployment target
+# Small:  150M-500M - Primary SLM sweet spot
+# Medium: 500M-3B   - Upper SLM bound
+# Large:  3B-7B     - Baseline comparison
+
+models:
+  # ============================================================================
+  # Nano Tier - Fast iteration, minimal resources
+  # ============================================================================
+  - id: distilbert-base-uncased
+    repo: "distilbert/distilbert-base-uncased"
+    format: safetensors
+    params: 66M
+    architecture: encoder-only
+    attention: standard
+    tier: nano
+    description: "Distilled BERT for fast sanity checks"
+
+  - id: albert-base-v2
+    repo: "albert/albert-base-v2"
+    format: safetensors
+    params: 11M
+    architecture: encoder-only
+    attention: factorized
+    tier: nano
+    description: "Parameter-efficient BERT variant"
+
+  # ============================================================================
+  # Micro Tier - Primary SLM targets for edge deployment
+  # ============================================================================
+  - id: mobilebert
+    repo: "google/mobilebert-uncased"
+    format: safetensors
+    params: 25M
+    architecture: encoder-only
+    attention: bottleneck
+    tier: micro
+    description: "Mobile-optimized BERT"
+
+  - id: phi-1
+    repo: "microsoft/phi-1"
+    format: safetensors
+    params: 350M
+    architecture: decoder-only
+    attention: standard
+    tier: micro
+    description: "Microsoft Phi-1 base model"
+
+  # ============================================================================
+  # Small Tier - Production SLM candidates
+  # ============================================================================
+  - id: phi-1_5
+    repo: "microsoft/phi-1_5"
+    format: safetensors
+    params: 350M
+    architecture: decoder-only
+    attention: standard
+    tier: small
+    description: "Microsoft Phi-1.5 with improved training"
+
+  - id: tinyllama-1.1b
+    repo: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    format: safetensors
+    params: 1.1B
+    architecture: decoder-only
+    attention: grouped-query
+    tier: small
+    description: "Compact Llama architecture"
+
+  # ============================================================================
+  # Medium Tier - Upper bound validation
+  # ============================================================================
+  - id: phi-2
+    repo: "microsoft/phi-2"
+    format: safetensors
+    params: 2.7B
+    architecture: decoder-only
+    attention: standard
+    tier: medium
+    description: "Microsoft Phi-2 for baseline comparison"
+
+  - id: stablelm-3b
+    repo: "stabilityai/stablelm-3b-4e1t"
+    format: safetensors
+    params: 3B
+    architecture: decoder-only
+    attention: standard
+    tier: medium
+    description: "StabilityAI 3B model"
+
+  # ============================================================================
+  # GGUF Format Validation (quantized models)
+  # ============================================================================
+  - id: phi-2-gguf
+    repo: "TheBloke/phi-2-GGUF"
+    format: gguf
+    quantization: Q4_K_M
+    params: 2.7B
+    architecture: decoder-only
+    tier: medium
+    description: "Phi-2 in GGUF Q4_K_M quantization"
+
+  - id: tinyllama-gguf
+    repo: "TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF"
+    format: gguf
+    quantization: Q4_K_M
+    params: 1.1B
+    architecture: decoder-only
+    tier: small
+    description: "TinyLlama in GGUF Q4_K_M quantization"
+
+  # ============================================================================
+  # Code-Focused Models (for Python→Rust transpilation)
+  # ============================================================================
+  - id: qwen2.5-coder-1.5b
+    repo: "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+    format: safetensors
+    params: 1.5B
+    architecture: decoder-only
+    attention: grouped-query
+    tier: small
+    description: "Qwen 2.5 Coder - best small code model"
+    specialty: code
+
+  - id: deepseek-coder-1.3b
+    repo: "deepseek-ai/deepseek-coder-1.3b-instruct"
+    format: safetensors
+    params: 1.3B
+    architecture: decoder-only
+    attention: standard
+    tier: small
+    description: "DeepSeek Coder - strong code reasoning"
+    specialty: code
+
+  - id: starcoder2-3b
+    repo: "bigcode/starcoder2-3b"
+    format: safetensors
+    params: 3B
+    architecture: decoder-only
+    attention: grouped-query
+    tier: medium
+    description: "StarCoder2 - code-specialized"
+    specialty: code
+
+# ==============================================================================
+# Architecture Coverage Matrix
+# ==============================================================================
+# This configuration covers:
+#   - Encoder-only: BERT variants (DistilBERT, ALBERT, MobileBERT)
+#   - Decoder-only: GPT-style (Phi, TinyLlama, StableLM)
+#   - Standard MHA: Most models
+#   - Grouped-Query Attention (GQA): TinyLlama, Qwen, StarCoder2
+#   - Factorized Attention: ALBERT
+#   - Bottleneck Attention: MobileBERT
+
+# ==============================================================================
+# Quantization Options for Pareto Analysis
+# ==============================================================================
+quantization_levels:
+  - id: fp16
+    description: "Half precision (baseline)"
+    bits: 16
+    method: none
+
+  - id: q8_0
+    description: "8-bit symmetric quantization"
+    bits: 8
+    method: symmetric
+
+  - id: q4_0
+    description: "4-bit block symmetric"
+    bits: 4
+    method: block_symmetric
+    block_size: 32
+
+  - id: q4_k_m
+    description: "4-bit K-quant medium (GGML)"
+    bits: 4
+    method: k_quant
+    quality: medium
+
+# ==============================================================================
+# Validation Requirements
+# ==============================================================================
+validation:
+  # Minimum prompts per model for statistical validity
+  min_prompts: 5
+  # Number of runs for Princeton methodology
+  runs_per_model: 5
+  # Confidence level for CI
+  confidence: 0.95
+  # Timeout per inference
+  timeout_seconds: 30
+  # Pass criteria
+  pass_criteria:
+    sanity_prompts: 1.0      # 100% of sanity prompts must pass
+    mmlu_prompts: 0.6        # 60% of MMLU prompts (allow for model variation)
+    code_prompts: 0.5        # 50% of code prompts
+    logit_consistency: 0.9   # 90% top-k agreement after conversion

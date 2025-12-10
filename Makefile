@@ -5,7 +5,7 @@
 # Disable built-in implicit rules for faster Make (bashrs MAKE013)
 .SUFFIXES:
 
-.PHONY: all check format lint lint-bash test test-fast test-integration bench bench-readme build build-release run clean install help coverage coverage-html mutants ci pmat-quality-gate pmat-rust-score pmat-validate-docs pmat-context evaluate evaluate-quick report
+.PHONY: all check format lint lint-bash test test-fast test-integration bench bench-readme build build-release run clean install help coverage coverage-html mutants ci pmat-quality-gate pmat-rust-score pmat-validate-docs pmat-context evaluate evaluate-quick report download-convert-test pipeline download convert validate
 
 # =============================================================================
 # Configuration
@@ -392,6 +392,46 @@ reproduce: models corpus-check evaluate report ## Full reproducible evaluation
 	@echo "   Report: reports/pareto-frontier.md"
 
 # =============================================================================
+# Download-Convert-Test Pipeline (Toyota Way: Heijunka)
+# =============================================================================
+# Full pipeline: Download → Convert → Validate → Evaluate → Report
+# Based on docs/specifications/download-convert-test-spec.md
+
+download-convert-test: download convert validate evaluate report ## Full DCT pipeline
+	@echo "✅ Download-Convert-Test pipeline complete"
+
+pipeline: download-convert-test ## Alias for download-convert-test
+
+# Download models from HuggingFace (Jidoka + Poka-yoke)
+download: ## Download models via CLI (validates config)
+	@echo "📥 Downloading models..."
+	$(CARGO) run --release -- download \
+		--config models/test-models.yaml \
+		--output models/raw
+
+# Convert models to .apr format (SPC gate)
+convert: ## Convert models to .apr format
+	@echo "🔄 Converting models to .apr format..."
+	$(CARGO) run --release -- convert \
+		--input models/raw \
+		--output models
+
+# Validate .apr models (magic bytes + logit consistency)
+validate: ## Validate .apr models
+	@echo "✅ Validating .apr models..."
+	$(CARGO) run --release -- validate \
+		--models "models/*.apr" \
+		--prompts prompts/validation-prompts.yaml
+
+# Run full pipeline via CLI
+pipeline-cli: ## Run full pipeline via CLI
+	$(CARGO) run --release -- pipeline \
+		--config models/test-models.yaml \
+		--prompts prompts/validation-prompts.yaml \
+		--output results/$$(date +%Y%m%d_%H%M%S) \
+		--runs 5
+
+# =============================================================================
 # Setup Targets
 # =============================================================================
 
@@ -447,6 +487,14 @@ help:
 	@echo "  evaluate-smol   - Evaluate SmolLM-135M only (fastest)"
 	@echo "  report          - Generate Pareto frontier report"
 	@echo "  reproduce       - Full reproducible evaluation workflow"
+	@echo ""
+	@echo "Download-Convert-Test Pipeline (Toyota Way):"
+	@echo "  download-convert-test - Full DCT pipeline (download → convert → validate → evaluate → report)"
+	@echo "  pipeline              - Alias for download-convert-test"
+	@echo "  download              - Download models from HuggingFace (Jidoka + Poka-yoke)"
+	@echo "  convert               - Convert models to .apr format (SPC gate)"
+	@echo "  validate              - Validate .apr models (magic bytes + logit consistency)"
+	@echo "  pipeline-cli          - Run full pipeline via CLI command"
 	@echo ""
 	@echo "EXTREME TDD Targets:"
 	@echo "  coverage        - Generate HTML coverage report (two-phase pattern)"

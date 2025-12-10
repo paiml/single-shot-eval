@@ -1,0 +1,269 @@
+# Validation Prompts: Golden Dataset for Stack Validation
+# Version: 1.0.0
+# Purpose: Regression testing for format conversion - NOT model capability evaluation
+#
+# Source Benchmarks:
+#   - MMLU (Hendrycks et al., 2021): https://arxiv.org/abs/2009.03300
+#   - HELM (Liang et al., 2022): https://arxiv.org/abs/2211.09110
+#   - HumanEval (Chen et al., 2021): https://arxiv.org/abs/2107.03374
+#
+# Version Control:
+#   - Changes to this file require review (affects regression baselines)
+#   - File hash included in test reports for reproducibility
+
+metadata:
+  version: "1.0.0"
+  description: "Golden dataset for Batuta stack validation"
+  source_benchmarks:
+    - name: "MMLU"
+      paper: "Measuring Massive Multitask Language Understanding"
+      authors: "Hendrycks et al."
+      year: 2021
+      url: "https://arxiv.org/abs/2009.03300"
+    - name: "HELM"
+      paper: "Holistic Evaluation of Language Models"
+      authors: "Liang et al."
+      year: 2022
+      url: "https://arxiv.org/abs/2211.09110"
+    - name: "HumanEval"
+      paper: "Evaluating Large Language Models Trained on Code"
+      authors: "Chen et al."
+      year: 2021
+      url: "https://arxiv.org/abs/2107.03374"
+  purpose: "Regression testing for format conversion - NOT model capability evaluation"
+  created: "2025-12-10"
+
+# ==============================================================================
+# TIER 1: Sanity Checks (model produces coherent output)
+# ==============================================================================
+prompts:
+  - id: sanity-completion
+    input: "The capital of France is"
+    expected_pattern: "Paris"
+    category: sanity
+    source: common_knowledge
+    difficulty: trivial
+    description: "Basic world knowledge completion"
+
+  - id: sanity-continuation
+    input: "1, 2, 3, 4,"
+    expected_pattern: "5"
+    category: sanity
+    source: pattern_recognition
+    difficulty: trivial
+    description: "Simple arithmetic sequence continuation"
+
+  - id: sanity-greeting
+    input: "Hello, my name is"
+    expected_pattern: ".+"
+    category: sanity
+    source: common_knowledge
+    difficulty: trivial
+    description: "Basic sentence completion"
+
+# ==============================================================================
+# TIER 2: MMLU-Tiny Subset (5 questions from distinct domains)
+# Source: https://arxiv.org/abs/2009.03300
+# ==============================================================================
+  - id: mmlu-elementary-math
+    input: |
+      Question: What is 15% of 80?
+      A) 8
+      B) 12
+      C) 15
+      D) 20
+      Answer:
+    expected_pattern: "[Bb].*12"
+    category: mmlu
+    source: MMLU/elementary_mathematics
+    difficulty: easy
+    description: "Basic percentage calculation"
+
+  - id: mmlu-world-history
+    input: |
+      Question: The French Revolution began in which year?
+      A) 1776
+      B) 1789
+      C) 1804
+      D) 1815
+      Answer:
+    expected_pattern: "[Bb].*1789"
+    category: mmlu
+    source: MMLU/world_history
+    difficulty: easy
+    description: "Historical date recall"
+
+  - id: mmlu-biology
+    input: |
+      Question: Which organelle is responsible for producing ATP in eukaryotic cells?
+      A) Nucleus
+      B) Ribosome
+      C) Mitochondria
+      D) Golgi apparatus
+      Answer:
+    expected_pattern: "[Cc].*[Mm]itochondria"
+    category: mmlu
+    source: MMLU/high_school_biology
+    difficulty: medium
+    description: "Cell biology knowledge"
+
+  - id: mmlu-physics
+    input: |
+      Question: What is the SI unit of force?
+      A) Joule
+      B) Watt
+      C) Newton
+      D) Pascal
+      Answer:
+    expected_pattern: "[Cc].*[Nn]ewton"
+    category: mmlu
+    source: MMLU/high_school_physics
+    difficulty: easy
+    description: "Basic physics unit"
+
+  - id: mmlu-chemistry
+    input: |
+      Question: What is the chemical symbol for gold?
+      A) Go
+      B) Gd
+      C) Au
+      D) Ag
+      Answer:
+    expected_pattern: "[Cc].*Au"
+    category: mmlu
+    source: MMLU/high_school_chemistry
+    difficulty: easy
+    description: "Periodic table knowledge"
+
+# ==============================================================================
+# TIER 3: Code Sanity (HumanEval-style, simplified)
+# Source: https://arxiv.org/abs/2107.03374
+# Purpose: Verify code generation capability preserved after conversion
+# ==============================================================================
+  - id: humaneval-add
+    input: |
+      def add(a: int, b: int) -> int:
+        """Return the sum of a and b."""
+    expected_pattern: "return\\s+a\\s*\\+\\s*b"
+    category: code
+    source: HumanEval/simplified
+    difficulty: trivial
+    description: "Simple function completion - addition"
+
+  - id: humaneval-is-even
+    input: |
+      def is_even(n: int) -> bool:
+        """Return True if n is even, False otherwise."""
+    expected_pattern: "return\\s+n\\s*%\\s*2\\s*==\\s*0|return\\s+not\\s+n\\s*%\\s*2"
+    category: code
+    source: HumanEval/simplified
+    difficulty: easy
+    description: "Simple function completion - even check"
+
+  - id: humaneval-max
+    input: |
+      def max_of_two(a: int, b: int) -> int:
+        """Return the larger of a and b."""
+    expected_pattern: "return\\s+(a\\s+if\\s+a\\s*>\\s*b|max\\(a,\\s*b\\)|b\\s+if\\s+b\\s*>\\s*a)"
+    category: code
+    source: HumanEval/simplified
+    difficulty: easy
+    description: "Simple function completion - max"
+
+  - id: humaneval-factorial
+    input: |
+      def factorial(n: int) -> int:
+        """Return the factorial of n (n!)."""
+    expected_pattern: "(if\\s+n\\s*[<=>]+\\s*[01]|for|while|math\\.factorial)"
+    category: code
+    source: HumanEval/simplified
+    difficulty: medium
+    description: "Recursive or iterative factorial"
+
+# ==============================================================================
+# TIER 4: Python-to-Rust Transpilation (domain-specific for single-shot-eval)
+# Purpose: Validate code transpilation capability after format conversion
+# ==============================================================================
+  - id: py2rs-hello
+    input: |
+      Translate to Rust:
+      def hello() -> str:
+        return "Hello, World!"
+    expected_pattern: "fn\\s+hello|pub\\s+fn\\s+hello"
+    category: transpile
+    source: py2rs/L1_Hello
+    difficulty: trivial
+    description: "Trivial function transpilation"
+
+  - id: py2rs-fibonacci
+    input: |
+      Translate to Rust:
+      def fibonacci(n: int) -> int:
+        if n <= 1:
+          return n
+        return fibonacci(n - 1) + fibonacci(n - 2)
+    expected_pattern: "fn\\s+fibonacci|match\\s+n|if\\s+n\\s*<=\\s*1"
+    category: transpile
+    source: py2rs/L3_Functions
+    difficulty: easy
+    description: "Recursive function transpilation"
+
+  - id: py2rs-list-sum
+    input: |
+      Translate to Rust:
+      def sum_list(nums: list[int]) -> int:
+        total = 0
+        for n in nums:
+          total += n
+        return total
+    expected_pattern: "fn\\s+sum_list|iter\\(\\)|fold|sum\\(\\)"
+    category: transpile
+    source: py2rs/L4_Collections
+    difficulty: medium
+    description: "Loop with iterator transpilation"
+
+# ==============================================================================
+# TIER 5: Format Consistency (verify tokenizer/detokenizer works)
+# ==============================================================================
+  - id: format-json
+    input: "Output a JSON object with keys 'name' and 'age': "
+    expected_pattern: '\\{.*"name".*:.*"age".*\\}'
+    category: format
+    source: custom
+    difficulty: easy
+    description: "JSON structure generation"
+
+  - id: format-list
+    input: "List three primary colors, one per line:"
+    expected_pattern: "(red|blue|yellow)"
+    category: format
+    source: custom
+    difficulty: easy
+    description: "List format output"
+
+  - id: format-markdown
+    input: "Write a markdown heading and bullet list:"
+    expected_pattern: "(#|\\*|-)"
+    category: format
+    source: custom
+    difficulty: easy
+    description: "Markdown format output"
+
+# ==============================================================================
+# Summary Statistics
+# ==============================================================================
+# Total prompts: 18
+# By category:
+#   - sanity: 3 (trivial baseline)
+#   - mmlu: 5 (knowledge recall)
+#   - code: 4 (Python completion)
+#   - transpile: 3 (Python to Rust)
+#   - format: 3 (structured output)
+#
+# By difficulty:
+#   - trivial: 5
+#   - easy: 10
+#   - medium: 3
+#
+# Version Control:
+#   SHA256 of this file should be recorded in test reports for reproducibility
