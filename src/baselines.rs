@@ -313,7 +313,7 @@ pub fn list_sovereign_models() -> Vec<(PathBuf, ModelFormat)> {
 /// Check if sovereign inference is available
 #[cfg(feature = "sovereign-inference")]
 #[must_use]
-pub fn is_sovereign_available() -> bool {
+pub const fn is_sovereign_available() -> bool {
     crate::sovereign::is_sovereign_available()
 }
 

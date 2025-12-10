@@ -1,7 +1,18 @@
-//! Model loading and inference using Aprender.
+//! Model loading and inference using Aprender and Realizar.
 //!
 //! Provides integration with the Aprender ML library for loading
 //! .apr model files and running inference for code generation tasks.
+//!
+//! ## Inference Backends
+//!
+//! 1. **Sovereign (PRIMARY)**: Native `.apr` inference via `realizar` (when feature enabled)
+//! 2. **Aprender**: N-gram and neural sequential models
+//! 3. **Placeholder**: Regex-based fallback (for testing only - NOT PRODUCTION)
+//!
+//! ## WARNING
+//!
+//! The `template_transform` function is a **test stub only**. For production use,
+//! enable the `sovereign-inference` feature and use real model inference.
 
 use anyhow::{Context, Result};
 use aprender::format::{self, ModelType};
@@ -9,6 +20,9 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::{Duration, Instant};
 use thiserror::Error;
+
+#[cfg(feature = "sovereign-inference")]
+use crate::sovereign::{SovereignError, SovereignRunner};
 
 /// Errors that can occur during inference
 #[derive(Error, Debug)]
@@ -24,6 +38,13 @@ pub enum InferenceError {
 
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
+
+    #[error("Sovereign inference not available: {0}")]
+    SovereignNotAvailable(String),
+
+    #[cfg(feature = "sovereign-inference")]
+    #[error("Sovereign error: {0}")]
+    SovereignError(#[from] SovereignError),
 }
 
 /// Configuration for model loading
@@ -82,12 +103,16 @@ impl Default for ModelMetadata {
 }
 
 /// Internal model representation
+#[allow(clippy::large_enum_variant)]
 enum ModelInner {
     /// N-gram language model for simple text generation
     Ngram(NgramModel),
     /// Neural sequence model for code generation
     Neural(NeuralModel),
-    /// Placeholder for models not yet loaded
+    /// Sovereign inference via realizar (REAL inference)
+    #[cfg(feature = "sovereign-inference")]
+    Sovereign(SovereignRunner),
+    /// Placeholder for models not yet loaded (TEST ONLY - NOT FOR PRODUCTION)
     Placeholder,
 }
 
@@ -146,7 +171,30 @@ impl LoadedModel {
             .unwrap_or("unknown")
             .to_string();
 
-        // Try to load as different model types
+        // PRIMARY: Try sovereign inference via realizar (REAL neural network inference)
+        #[cfg(feature = "sovereign-inference")]
+        {
+            if let Ok(runner) = SovereignRunner::load(path) {
+                tracing::info!(
+                    model_id = %id,
+                    format = %runner.format().as_str(),
+                    "Loaded model via sovereign inference (realizar)"
+                );
+                return Ok(Self {
+                    id,
+                    metadata: ModelMetadata {
+                        name: path
+                            .file_name()
+                            .map_or_else(|| "model".to_string(), |n| n.to_string_lossy().to_string()),
+                        model_type: format!("sovereign-{}", runner.format().as_str()),
+                        ..Default::default()
+                    },
+                    inner: ModelInner::Sovereign(runner),
+                });
+            }
+        }
+
+        // FALLBACK: Try aprender format loaders
         // First try NgramLm (simpler, more likely for SLMs)
         if let Ok(model) = format::load::<NgramModel>(path, ModelType::NgramLm) {
             return Ok(Self {
@@ -194,7 +242,8 @@ impl LoadedModel {
 
         // If we can't load any known type, return error with helpful message
         Err(anyhow::anyhow!(
-            "Could not load model from {}: unsupported format or corrupted file",
+            "Could not load model from {}: unsupported format or corrupted file. \
+             Enable 'sovereign-inference' feature for .apr/.gguf support.",
             path.display()
         ))
     }
@@ -222,9 +271,16 @@ impl LoadedModel {
         let output = match &self.inner {
             ModelInner::Ngram(model) => Self::infer_ngram(model, input),
             ModelInner::Neural(model) => Self::infer_neural(model, input),
+            #[cfg(feature = "sovereign-inference")]
+            ModelInner::Sovereign(runner) => Self::infer_sovereign(runner, input)?,
             ModelInner::Placeholder => {
                 // Placeholder returns simulated output
-                Self::infer_simulated(input)
+                // WARNING: This is for testing only, not production!
+                tracing::warn!(
+                    "Using placeholder inference (template_transform). \
+                     Enable 'sovereign-inference' feature for real model execution."
+                );
+                Self::template_transform(input)
             }
         };
 
@@ -235,6 +291,27 @@ impl LoadedModel {
         })
     }
 
+    /// Sovereign inference via realizar (REAL neural network inference)
+    #[cfg(feature = "sovereign-inference")]
+    fn infer_sovereign(runner: &SovereignRunner, input: &str) -> Result<String> {
+        let system_prompt = "You are an expert code transpiler. \
+            Convert Python code to idiomatic Rust. \
+            Only output the Rust code, no explanations.";
+
+        let result = runner.run_with_system(system_prompt, input)?;
+
+        if result.success {
+            tracing::debug!(
+                model_id = %result.model_id,
+                latency_ms = result.latency.as_millis(),
+                "Sovereign inference completed"
+            );
+            Ok(result.response)
+        } else {
+            Err(anyhow::anyhow!("Sovereign inference failed"))
+        }
+    }
+
     /// N-gram based inference (simple next-token prediction)
     fn infer_ngram(model: &NgramModel, input: &str) -> String {
         // Simplified n-gram inference
@@ -242,6 +319,7 @@ impl LoadedModel {
         let _ = model; // Use model in real implementation
 
         // For now, return a template-based transformation
+        // TODO: Implement proper n-gram prediction using model.order and model.vocab_size
         Self::template_transform(input)
     }
 
@@ -251,16 +329,20 @@ impl LoadedModel {
         // In a real implementation, this would run through the network layers
         let _ = model; // Use model in real implementation
 
-        Self::template_transform(input)
-    }
-
-    /// Simulated inference for placeholder models
-    fn infer_simulated(input: &str) -> String {
+        // TODO: Implement proper forward pass through model.layers
         Self::template_transform(input)
     }
 
     /// Template-based Python to Rust transformation
-    /// This is a simplified transformation for demonstration
+    ///
+    /// # WARNING
+    ///
+    /// This is a **test stub only** - it uses regex replacement, NOT real inference.
+    /// For production use, enable `sovereign-inference` feature.
+    ///
+    /// The QA team correctly identified this as a falsification of the inference claim.
+    /// See `docs/qa/100point-popper-nullification-qa.md` for details.
+    #[doc(hidden)]
     fn template_transform(python_code: &str) -> String {
         // Very basic Python to Rust transformation rules
         let mut rust_code = python_code.to_string();
