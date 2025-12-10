@@ -121,7 +121,11 @@ impl CompilerVerifier {
     /// # Errors
     ///
     /// Returns error if temp directory creation fails or timeout occurs.
-    pub fn verify(&self, rust_code: &str, test_code: Option<&str>) -> Result<VerificationResult, CompilerError> {
+    pub fn verify(
+        &self,
+        rust_code: &str,
+        test_code: Option<&str>,
+    ) -> Result<VerificationResult, CompilerError> {
         // Create temp project
         let temp_dir = TempDir::new()?;
         let project_path = temp_dir.path();
@@ -208,7 +212,9 @@ impl CompilerVerifier {
         // Write main lib.rs with code
         let lib_content = test_code.map_or_else(
             || rust_code.to_string(),
-            |tests| format!("{rust_code}\n\n#[cfg(test)]\nmod tests {{\n    use super::*;\n{tests}\n}}"),
+            |tests| {
+                format!("{rust_code}\n\n#[cfg(test)]\nmod tests {{\n    use super::*;\n{tests}\n}}")
+            },
         );
         std::fs::write(src_dir.join("lib.rs"), lib_content)?;
 
@@ -274,37 +280,40 @@ impl Default for CompilerVerifier {
     }
 }
 
+/// Extract count preceding a keyword from test output line
+fn extract_count_before(line: &str, keyword: &str) -> usize {
+    line.find(keyword)
+        .and_then(|idx| line[..idx].split_whitespace().next_back())
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0)
+}
+
+/// Extract count from semicolon-separated section before keyword
+fn extract_count_after_semicolon(line: &str, keyword: &str) -> usize {
+    line.find(keyword)
+        .and_then(|idx| line[..idx].split(';').next_back())
+        .and_then(|section| section.split_whitespace().next_back())
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0)
+}
+
+/// Parse test result line into (passed, failed) counts
+fn parse_result_line(line: &str) -> (usize, usize) {
+    let passed = extract_count_before(line, "passed");
+    let failed = extract_count_after_semicolon(line, "failed");
+    (passed, failed)
+}
+
 /// Parse test counts from cargo test output
 fn parse_test_counts(output: &str) -> (usize, usize) {
     // Look for "test result: ok. X passed; Y failed; Z ignored"
-    for line in output.lines() {
-        if line.contains("test result:") {
-            let mut passed = 0;
-            let mut failed = 0;
-
-            // Parse "X passed"
-            if let Some(idx) = line.find("passed") {
-                let before = &line[..idx];
-                if let Some(num_str) = before.split_whitespace().next_back() {
-                    passed = num_str.parse().unwrap_or(0);
-                }
-            }
-
-            // Parse "Y failed"
-            if let Some(idx) = line.find("failed") {
-                let before = &line[..idx];
-                if let Some(num_str) = before.split(';').next_back() {
-                    if let Some(num) = num_str.split_whitespace().next_back() {
-                        failed = num.parse().unwrap_or(0);
-                    }
-                }
-            }
-
-            return (passed + failed, passed);
-        }
-    }
-
-    (0, 0)
+    output
+        .lines()
+        .find(|line| line.contains("test result:"))
+        .map_or((0, 0), |line| {
+            let (passed, failed) = parse_result_line(line);
+            (passed + failed, passed)
+        })
 }
 
 /// Batch verification for multiple examples
@@ -331,10 +340,7 @@ impl BatchVerifier {
 
     /// Verify multiple code samples, returning pass rate
     #[must_use]
-    pub fn verify_batch(
-        &self,
-        samples: &[(String, Option<String>)],
-    ) -> BatchResult {
+    pub fn verify_batch(&self, samples: &[(String, Option<String>)]) -> BatchResult {
         let mut results = Vec::with_capacity(samples.len());
 
         for (code, tests) in samples {
@@ -342,8 +348,14 @@ impl BatchVerifier {
             results.push(result);
         }
 
-        let passed = results.iter().filter(|r| r.as_ref().is_ok_and(VerificationResult::passes)).count();
-        let compiled = results.iter().filter(|r| r.as_ref().is_ok_and(|v| v.compiles)).count();
+        let passed = results
+            .iter()
+            .filter(|r| r.as_ref().is_ok_and(VerificationResult::passes))
+            .count();
+        let compiled = results
+            .iter()
+            .filter(|r| r.as_ref().is_ok_and(|v| v.compiles))
+            .count();
         let total = results.len();
 
         BatchResult {
@@ -607,9 +619,7 @@ pub fn add(a: i32, b: i32) -> i32 {
     #[test]
     fn test_generate_cargo_toml() {
         let config = CompilerConfig {
-            dependencies: vec![
-                ("serde".to_string(), "1.0".to_string()),
-            ],
+            dependencies: vec![("serde".to_string(), "1.0".to_string())],
             ..Default::default()
         };
         let verifier = CompilerVerifier::with_config(config);
@@ -650,12 +660,10 @@ pub fn add(a: i32, b: i32) -> i32 {
     #[test]
     fn test_batch_result_with_tests() {
         let batch = BatchVerifier::new();
-        let samples = vec![
-            (
-                "pub fn add(a: i32, b: i32) -> i32 { a + b }".to_string(),
-                Some("    #[test]\n    fn t() { assert_eq!(super::add(1, 2), 3); }".to_string()),
-            ),
-        ];
+        let samples = vec![(
+            "pub fn add(a: i32, b: i32) -> i32 { a + b }".to_string(),
+            Some("    #[test]\n    fn t() { assert_eq!(super::add(1, 2), 3); }".to_string()),
+        )];
 
         let result = batch.verify_batch(&samples);
         assert_eq!(result.total, 1);

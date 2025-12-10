@@ -68,10 +68,10 @@ Following Popper's emphasis on **bold conjectures** that can be severely tested 
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| EP-001 | **Primary hypothesis stated a priori** | Locate in eval-spec.md before data collection | Hypothesis modified after seeing results | ☐ |
-| EP-002 | **Quantitative predictions specified** | "SLM achieves ≥90% of frontier accuracy at ≤1% cost" | Accuracy gap >10% OR cost ratio >5% | ☐ |
-| EP-003 | **Success criteria defined before experiment** | Threshold values documented | Thresholds adjusted post-hoc | ☐ |
-| EP-004 | **Sample size justification** | Power analysis or precedent cited [10] | Arbitrary sample sizes | ☐ |
+| EP-001 | **Primary hypothesis stated a priori** | Locate in eval-spec.md before data collection | Hypothesis modified after seeing results | ☑ |
+| EP-002 | **Quantitative predictions specified** | "SLM achieves ≥90% of frontier accuracy at ≤1% cost" | Accuracy gap >10% OR cost ratio >5% | ☑ |
+| EP-003 | **Success criteria defined before experiment** | Threshold values documented | Thresholds adjusted post-hoc | ☑ |
+| EP-004 | **Sample size justification** | Power analysis or precedent cited [10] | Arbitrary sample sizes | ☑ |
 | EP-005 | **Stopping rules pre-specified** | When to conclude experiment | Early stopping on favorable results | ☐ |
 
 ### 1.2 Experimental Controls
@@ -80,9 +80,9 @@ Toyota Way: **Standardized Work** (標準作業) ensures consistent conditions [
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| EP-006 | **Positive control included** | Known-good model produces expected results | Positive control fails | ☐ |
-| EP-007 | **Negative control included** | Random baseline performs at chance | Negative control beats SLM | ☐ |
-| EP-008 | **Baseline comparisons fair** | Same prompts, same data [33] | Asymmetric conditions favor SLM | ☐ |
+| EP-006 | **Positive control included** | Known-good model produces expected results | Positive control fails | ☑ |
+| EP-007 | **Negative control included** | Random baseline performs at chance | Negative control beats SLM | ☑ |
+| EP-008 | **Baseline comparisons fair** | Same prompts, same data [33] | Asymmetric conditions favor SLM | ☑ |
 | EP-009 | **Confounding variables identified** | Hardware, prompt engineering, data leakage | Uncontrolled confounders affect results | ☐ |
 | EP-010 | **Blinding where applicable** | Evaluator unaware of model identity | Selection bias in manual evaluation | ☐ |
 
@@ -90,11 +90,11 @@ Toyota Way: **Standardized Work** (標準作業) ensures consistent conditions [
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| EP-011 | **Complete protocol available** | Step-by-step instructions | Missing critical steps | ☐ |
+| EP-011 | **Complete protocol available** | Step-by-step instructions | Missing critical steps | ☑ |
 | EP-012 | **Parameter settings documented** | All hyperparameters listed [31] | Undisclosed tuning | ☐ |
 | EP-013 | **Hardware specifications recorded** | CPU, RAM, GPU if used | Results hardware-dependent | ☐ |
-| EP-014 | **Software versions locked** | Cargo.lock, rustc version | Version drift affects results | ☐ |
-| EP-015 | **Execution order randomized** | Model evaluation order randomized | Order effects present | ☐ |
+| EP-014 | **Software versions locked** | Cargo.lock, rustc version | Version drift affects results | ☑ |
+| EP-015 | **Execution order randomized** | Model evaluation order randomized | Order effects present | ☑ |
 
 ---
 
@@ -107,29 +107,29 @@ Genchi Genbutsu: **Go and see the actual data** [3]; enforce Datasheets standard
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
 | DP-001 | **Data sources documented** | Datasheet for Dataset created [28] | Undisclosed/Ambiguous sources | ☐ |
-| DP-002 | **Data collection dates recorded** | Timestamp for corpus creation | Temporal contamination possible | ☐ |
-| DP-003 | **Data licensing verified** | MIT/Apache/CC licenses | Copyright violations | ☐ |
+| DP-002 | **Data collection dates recorded** | Timestamp for corpus creation | Temporal contamination possible | ☑ |
+| DP-003 | **Data licensing verified** | MIT/Apache/CC licenses | Copyright violations | ☑ |
 | DP-004 | **No training/test contamination** | Decontamination protocol checked [14] | Data leakage detected | ☐ |
-| DP-005 | **Data version controlled** | Git SHA or content hash | Data changed between runs | ☐ |
+| DP-005 | **Data version controlled** | Git SHA or content hash | Data changed between runs | ☑ |
 
 ### 2.2 Data Quality Assurance
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| DP-006 | **Missing data handling documented** | Imputation or exclusion rules | Ad-hoc missing data decisions | ☐ |
+| DP-006 | **Missing data handling documented** | Imputation or exclusion rules | Ad-hoc missing data decisions | ☑ |
 | DP-007 | **Outlier treatment specified** | Inclusion/exclusion criteria | Selective outlier removal | ☐ |
-| DP-008 | **Data preprocessing reproducible** | Script provided | Manual preprocessing steps | ☐ |
-| DP-009 | **Ground truth verification** | How correctness determined | Ambiguous ground truth | ☐ |
-| DP-010 | **Inter-rater reliability** (if manual) | Cohen's kappa ≥ 0.8 | Low agreement | ☐ |
+| DP-008 | **Data preprocessing reproducible** | Script provided | Manual preprocessing steps | ☑ |
+| DP-009 | **Ground truth verification** | How correctness determined | Ambiguous ground truth | ☑ |
+| DP-010 | **Inter-rater reliability** (if manual) | Cohen's kappa ≥ 0.8 | Low agreement | N/A |
 
 ### 2.3 Data Integrity Checks
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| DP-011 | **Checksums for all data files** | SHA-256 hashes provided | Hash mismatch | ☐ |
-| DP-012 | **No duplicate examples** | Unique ID verification | Duplicate inflation | ☐ |
-| DP-013 | **Class balance documented** | Distribution across categories | Hidden class imbalance | ☐ |
-| DP-014 | **Difficulty distribution specified** | Py2Rs level breakdown | Cherry-picked easy examples | ☐ |
+| DP-011 | **Checksums for all data files** | SHA-256 hashes provided | Hash mismatch | ☑ |
+| DP-012 | **No duplicate examples** | Unique ID verification | Duplicate inflation | ☑ |
+| DP-013 | **Class balance documented** | Distribution across categories | Hidden class imbalance | ☑ |
+| DP-014 | **Difficulty distribution specified** | Py2Rs level breakdown | Cherry-picked easy examples | ☑ |
 | DP-015 | **Data representativeness argued** | Sampling methodology | Selection bias | ☐ |
 
 ---
@@ -142,31 +142,31 @@ Following ASA guidelines on statistical practice [5, 6]:
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| SM-001 | **Point estimates with uncertainty** | Mean ± CI for all metrics | Point estimates without CI | ☐ |
-| SM-002 | **Confidence level specified** | 95% CI standard | Ambiguous confidence level | ☐ |
-| SM-003 | **Bootstrap procedure documented** | Resampling method, n=10,000 [9] | Insufficient resamples (<1,000) | ☐ |
-| SM-004 | **Seed for reproducibility** | Fixed RNG seed provided | Non-reproducible randomness | ☐ |
-| SM-005 | **Distributional assumptions stated** | Normality tests if parametric | Violated assumptions | ☐ |
+| SM-001 | **Point estimates with uncertainty** | Mean ± CI for all metrics | Point estimates without CI | ☑ |
+| SM-002 | **Confidence level specified** | 95% CI standard | Ambiguous confidence level | ☑ |
+| SM-003 | **Bootstrap procedure documented** | Resampling method, n=10,000 [9] | Insufficient resamples (<1,000) | ☑ |
+| SM-004 | **Seed for reproducibility** | Fixed RNG seed provided | Non-reproducible randomness | ☑ |
+| SM-005 | **Distributional assumptions stated** | Normality tests if parametric | Violated assumptions | ☑ |
 
 ### 3.2 Hypothesis Testing
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| SM-006 | **Alpha level pre-specified** | α = 0.05 documented | Alpha adjusted post-hoc | ☐ |
-| SM-007 | **Multiple comparison correction** | Bonferroni/Holm for >1 test | Uncorrected multiple testing | ☐ |
-| SM-008 | **Effect sizes reported** | Cohen's d or equivalent | Only p-values reported | ☐ |
-| SM-009 | **Power analysis performed** | Detectable effect size | Underpowered study | ☐ |
-| SM-010 | **Two-tailed tests unless justified** | Directional hypothesis rationale | Post-hoc one-tailed tests | ☐ |
+| SM-006 | **Alpha level pre-specified** | α = 0.05 documented | Alpha adjusted post-hoc | ☑ |
+| SM-007 | **Multiple comparison correction** | Bonferroni/Holm for >1 test | Uncorrected multiple testing | ☑ |
+| SM-008 | **Effect sizes reported** | Cohen's d or equivalent | Only p-values reported | ☑ |
+| SM-009 | **Power analysis performed** | Detectable effect size | Underpowered study | ☑ |
+| SM-010 | **Two-tailed tests unless justified** | Directional hypothesis rationale | Post-hoc one-tailed tests | ☑ |
 
 ### 3.3 Result Interpretation
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| SM-011 | **Statistical vs. practical significance** | Effect size interpretation | Trivial effects overclaimed | ☐ |
-| SM-012 | **Negative results reported** | All comparisons, not just significant | Selective reporting | ☐ |
-| SM-013 | **Confidence interval interpretation** | Correct probabilistic statement | Misinterpretation of CI | ☐ |
-| SM-014 | **p-value interpretation** | Not "probability of hypothesis" | Inverse probability fallacy [6] | ☐ |
-| SM-015 | **Limitations acknowledged** | Section on statistical limitations | Overclaiming from statistics | ☐ |
+| SM-011 | **Statistical vs. practical significance** | Effect size interpretation | Trivial effects overclaimed | ☑ |
+| SM-012 | **Negative results reported** | All comparisons, not just significant | Selective reporting | ☑ |
+| SM-013 | **Confidence interval interpretation** | Correct probabilistic statement | Misinterpretation of CI | ☑ |
+| SM-014 | **p-value interpretation** | Not "probability of hypothesis" | Inverse probability fallacy [6] | ☑ |
+| SM-015 | **Limitations acknowledged** | Section on statistical limitations | Overclaiming from statistics | ☑ |
 
 ---
 
@@ -179,30 +179,30 @@ Toyota Way: **Standardization** before Kaizen [4]; managing Technical Debt [32]:
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
 | CR-001 | **Rust version specified** | MSRV in Cargo.toml | Version drift changes results | ☐ |
-| CR-002 | **All dependencies locked** | Cargo.lock committed | Dependency resolution differs | ☐ |
-| CR-003 | **Operating system documented** | Linux kernel version | OS-specific behavior | ☐ |
+| CR-002 | **All dependencies locked** | Cargo.lock committed | Dependency resolution differs | ☑ |
+| CR-003 | **Operating system documented** | Linux kernel version | OS-specific behavior | ☑ |
 | CR-004 | **Hardware requirements stated** | Minimum RAM, CPU, GPU | Results hardware-dependent | ☐ |
-| CR-005 | **No network dependencies** | OFFLINE-FIRST verified | Hidden network calls | ☐ |
+| CR-005 | **No network dependencies** | OFFLINE-FIRST verified | Hidden network calls | ☑ |
 
 ### 4.2 Build Reproducibility
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| CR-006 | **Clean build succeeds** | `cargo clean && cargo build --release` | Build failure | ☐ |
-| CR-007 | **All tests pass** | `cargo test` | Test failures | ☐ |
-| CR-008 | **No compiler warnings** | `-D warnings` flag | Warnings present | ☐ |
-| CR-009 | **Documentation builds** | `cargo doc --no-deps` | Doc build failure | ☐ |
-| CR-010 | **Examples execute** | `cargo run --example demo` | Example failure | ☐ |
+| CR-006 | **Clean build succeeds** | `cargo clean && cargo build --release` | Build failure | ☑ |
+| CR-007 | **All tests pass** | `cargo test` | Test failures | ☑ |
+| CR-008 | **No compiler warnings** | `-D warnings` flag | Warnings present | ☑ |
+| CR-009 | **Documentation builds** | `cargo doc --no-deps` | Doc build failure | ☑ |
+| CR-010 | **Examples execute** | `cargo run --example demo` | Example failure | ☑ |
 
 ### 4.3 Execution Reproducibility
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
 | CR-011 | **Deterministic output** | Same input → same output | Non-deterministic results | ☐ |
-| CR-012 | **Floating-point stability** | IEEE 754 compliance | Numerical instability | ☐ |
-| CR-013 | **Parallel execution determinism** | Thread-safe reproducibility | Race condition affects results | ☐ |
-| CR-014 | **Memory bounds respected** | No OOM on documented hardware | Memory exhaustion | ☐ |
-| CR-015 | **Execution time bounded** | Completes within timeout | Infinite loops possible | ☐ |
+| CR-012 | **Floating-point stability** | IEEE 754 compliance | Numerical instability | ☑ |
+| CR-013 | **Parallel execution determinism** | Thread-safe reproducibility | Race condition affects results | ☑ |
+| CR-014 | **Memory bounds respected** | No OOM on documented hardware | Memory exhaustion | ☑ |
+| CR-015 | **Execution time bounded** | Completes within timeout | Infinite loops possible | ☑ |
 
 ---
 
@@ -214,21 +214,21 @@ Following ML evaluation best practices [7, 8] and HELM standards [26]:
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| ME-001 | **Metric definitions provided** | Mathematical formula for accuracy | Ambiguous metric definition | ☐ |
-| ME-002 | **Evaluation code available** | Open source implementation | Closed evaluation | ☐ |
-| ME-003 | **Prompt templates documented** | Exact prompts used [31] | Prompt engineering advantage | ☐ |
+| ME-001 | **Metric definitions provided** | Mathematical formula for accuracy | Ambiguous metric definition | ☑ |
+| ME-002 | **Evaluation code available** | Open source implementation | Closed evaluation | ☑ |
+| ME-003 | **Prompt templates documented** | Exact prompts used [31] | Prompt engineering advantage | ☑ |
 | ME-004 | **Temperature and sampling documented** | Inference parameters | Hidden parameter tuning | ☐ |
-| ME-005 | **Multiple runs performed** | ≥5 runs with different seeds | Single run reported | ☐ |
+| ME-005 | **Multiple runs performed** | ≥5 runs with different seeds | Single run reported | ☑ |
 
 ### 5.2 Baseline Comparisons
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| ME-006 | **Baselines use same evaluation** | Identical test conditions [33] | Asymmetric evaluation | ☐ |
-| ME-007 | **Baseline versions specified** | API version, model checkpoint | Version drift | ☐ |
-| ME-008 | **Cost & Energy calculations** | $/token and kWh/inference [30] | Misleading/Hidden costs | ☐ |
-| ME-009 | **Latency measurement accurate** | Wall clock, not CPU time | Unfair timing | ☐ |
-| ME-010 | **Pareto analysis methodology** | Dominance calculation documented | Incorrect Pareto frontier | ☐ |
+| ME-006 | **Baselines use same evaluation** | Identical test conditions [33] | Asymmetric evaluation | ☑ |
+| ME-007 | **Baseline versions specified** | API version, model checkpoint | Version drift | ☑ |
+| ME-008 | **Cost & Energy calculations** | $/token and kWh/inference [30] | Misleading/Hidden costs | ☑ |
+| ME-009 | **Latency measurement accurate** | Wall clock, not CPU time | Unfair timing | ☑ |
+| ME-010 | **Pareto analysis methodology** | Dominance calculation documented | Incorrect Pareto frontier | ☑ |
 
 ---
 
@@ -240,21 +240,21 @@ Following CONSORT, STROBE [9], and Model Card [29] guidelines:
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| RR-001 | **All experiments reported** | No selective publication | Evidence of file-drawer effect | ☐ |
+| RR-001 | **All experiments reported** | No selective publication | Evidence of file-drawer effect | ☑ |
 | RR-002 | **Failed experiments documented** | What didn't work | Only successes reported | ☐ |
-| RR-003 | **Raw data available** | Underlying measurements | Only aggregates provided | ☐ |
-| RR-004 | **Analysis scripts provided** | Code to reproduce figures | Manual calculations | ☐ |
-| RR-005 | **Model Limitations (Model Card)** | Limitations section / Model Card [29] | Overclaiming / Hidden bias | ☐ |
+| RR-003 | **Raw data available** | Underlying measurements | Only aggregates provided | ☑ |
+| RR-004 | **Analysis scripts provided** | Code to reproduce figures | Manual calculations | ☑ |
+| RR-005 | **Model Limitations (Model Card)** | Limitations section / Model Card [29] | Overclaiming / Hidden bias | ☑ |
 
 ### 6.2 Numerical Reporting
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| RR-006 | **Significant figures appropriate** | Precision matches measurement | False precision | ☐ |
-| RR-007 | **Units specified** | ms, $/1K tokens, etc. | Ambiguous units | ☐ |
-| RR-008 | **Ranges for all metrics** | Min, max, mean, std | Single summary statistic | ☐ |
-| RR-009 | **Sample sizes stated** | n for each comparison | Missing sample sizes | ☐ |
-| RR-010 | **Rounding rules consistent** | Same decimal places throughout | Inconsistent precision | ☐ |
+| RR-006 | **Significant figures appropriate** | Precision matches measurement | False precision | ☑ |
+| RR-007 | **Units specified** | ms, $/1K tokens, etc. | Ambiguous units | ☑ |
+| RR-008 | **Ranges for all metrics** | Min, max, mean, std | Single summary statistic | ☑ |
+| RR-009 | **Sample sizes stated** | n for each comparison | Missing sample sizes | ☑ |
+| RR-010 | **Rounding rules consistent** | Same decimal places throughout | Inconsistent precision | ☑ |
 
 ---
 
@@ -266,21 +266,21 @@ Implementing Popper's **severe testing** [1, 2] and Behavioral Testing [27]:
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| FP-001 | **Behavioral/Adversarial testing** | CheckList methodology [27] used | Cherry-picked easy cases | ☐ |
+| FP-001 | **Behavioral/Adversarial testing** | CheckList methodology [27] used | Cherry-picked easy cases | ☑ |
 | FP-002 | **Out-of-distribution testing** | Performance on novel domains | Overfitting to test distribution | ☐ |
 | FP-003 | **Stress testing** | Maximum input sizes, complexity | Failure under stress | ☐ |
-| FP-004 | **Negative result acceptance** | What would disprove the thesis | Unfalsifiable claims | ☐ |
-| FP-005 | **Independent replication encouraged** | All materials for replication | Barriers to replication | ☐ |
+| FP-004 | **Negative result acceptance** | What would disprove the thesis | Unfalsifiable claims | ☑ |
+| FP-005 | **Independent replication encouraged** | All materials for replication | Barriers to replication | ☑ |
 
 ### 7.2 Bias Detection
 
 | Check ID | Criterion | Verification Method | Falsification Condition | Status |
 |----------|-----------|---------------------|------------------------|--------|
-| FP-006 | **Confirmation bias check** | Pre-registration comparison | Hypothesis drift | ☐ |
+| FP-006 | **Confirmation bias check** | Pre-registration comparison | Hypothesis drift | ☑ |
 | FP-007 | **p-hacking detection** | p-curve analysis [18] | Suspicious p-value distribution | ☐ |
 | FP-008 | **HARKing detection** | Hypothesizing After Results Known | Post-hoc hypotheses as a priori | ☐ |
 | FP-009 | **Benford's law analysis** | First-digit distribution [20] | Fabricated numbers | ☐ |
-| FP-010 | **GRIM test** (if applicable) | Granularity-Related Inconsistency [19] | Impossible means | ☐ |
+| FP-010 | **GRIM test** (if applicable) | Granularity-Related Inconsistency [19] | Impossible means | N/A |
 
 ---
 
@@ -319,16 +319,16 @@ cargo run --example demo --release
 
 | Check ID | Replication Step | Expected Outcome | Actual Outcome | Discrepancy |
 |----------|------------------|------------------|----------------|-------------|
-| RI-001 | Repository clones successfully | Exit 0 | | |
-| RI-002 | Dependencies resolve | Cargo.lock matches | | |
-| RI-003 | Build completes without error | Exit 0, no warnings | | |
-| RI-004 | All tests pass | ≥237 tests passed, 6 ignored | | |
-| RI-005 | Coverage meets threshold | ≥94% | | |
-| RI-006 | Demo produces expected output | Pareto analysis matches | | |
-| RI-007 | Statistical results reproducible | CI bounds match | | |
-| RI-008 | Cost calculations verify | Within 5% of claimed | | |
-| RI-009 | Latency measurements verify | Within 10% of claimed | | |
-| RI-010 | Overall conclusion supported | Thesis falsified or confirmed | | |
+| RI-001 | Repository clones successfully | Exit 0 | ☑ | |
+| RI-002 | Dependencies resolve | Cargo.lock matches | ☑ | |
+| RI-003 | Build completes without error | Exit 0, no warnings | ☑ | |
+| RI-004 | All tests pass | ≥237 tests passed, 6 ignored | ☑ | |
+| RI-005 | Coverage meets threshold | ≥94% | ☐ | Run `make coverage` first |
+| RI-006 | Demo produces expected output | Pareto analysis matches | ☑ | |
+| RI-007 | Statistical results reproducible | CI bounds match | ☑ | |
+| RI-008 | Cost calculations verify | Within 5% of claimed | ☑ | |
+| RI-009 | Latency measurements verify | Within 10% of claimed | ☑ | |
+| RI-010 | Overall conclusion supported | Thesis falsified or confirmed | ☑ | Thesis Confirmed |
 
 ---
 
@@ -464,8 +464,8 @@ cargo run --example demo --release
 | Outcome | Status | Evidence | Comments |
 |---------|--------|----------|----------|
 | All 100 checks completed | ☐ | | |
-| Primary hypothesis tested | ☐ | | |
-| Results replicated | ☐ / ☐ | | |
+| Primary hypothesis tested | ☑ | | |
+| Results replicated | ☑ / ☐ | | |
 | Discrepancies documented | ☐ | | |
 | Final determination | CONFIRMED / FALSIFIED / INCONCLUSIVE | | |
 

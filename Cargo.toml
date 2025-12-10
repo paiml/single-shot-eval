@@ -15,9 +15,9 @@ categories = ["command-line-utilities", "science"]
 # BATUTA SOVEREIGN STACK (crates.io ONLY - NO git dependencies)
 # =============================================================================
 # Core ML library - .apr format, inference, metrics, bench
-aprender = "0.16"
+aprender = "0.17"
 # Training/distillation/conversion library
-entrenar = "0.2"
+entrenar = "0.2.7"
 
 # =============================================================================
 # CLI & Configuration
@@ -39,9 +39,21 @@ thiserror = "2.0"
 shell-words = "1.1"
 
 # =============================================================================
+# SOVEREIGN INFERENCE ENGINE - Native .apr model execution via realizar
+# =============================================================================
+# Primary: .apr format | Fallback: .gguf, .safetensors
+realizar = { version = "0.2.3", optional = true, default-features = false }
+
+# =============================================================================
 # File pattern matching
 # =============================================================================
 glob = "0.3"
+
+# =============================================================================
+# Cryptography (for checksum verification - Jidoka)
+# =============================================================================
+sha2 = "0.10"
+dirs = "5.0"
 
 # =============================================================================
 # Logging
@@ -82,9 +94,9 @@ insta = { version = "1.41", features = ["yaml"] }
 # BATUTA STACK INTEGRATION TESTING
 # =============================================================================
 # ML inference engine - proves realizar while testing inference.rs
-realizar = { version = "0.2", default-features = false }
+realizar = { version = "0.2.3", default-features = false }
 # Data loading - proves alimentar while testing corpus.rs
-alimentar = { version = "0.2", default-features = false }
+alimentar = { version = "0.2.2", default-features = false }
 
 [[bin]]
 name = "single-shot-eval"
@@ -97,6 +109,11 @@ path = "src/lib.rs"
 [[bench]]
 name = "pareto"
 harness = false
+
+[features]
+default = []
+# Enable sovereign inference using realizar (replaces ollama)
+sovereign-inference = ["dep:realizar"]
 
 [profile.release]
 lto = true

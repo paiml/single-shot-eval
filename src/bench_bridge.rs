@@ -47,6 +47,51 @@ pub fn to_bench_example(example: &PythonExample) -> BenchExample {
         .with_tags(vec!["corpus".to_string(), "py2rs".to_string()])
 }
 
+/// Features extracted from Python source code
+#[allow(clippy::struct_excessive_bools)]
+struct CodeFeatures {
+    lines: usize,
+    has_class: bool,
+    has_async: bool,
+    has_decorator: bool,
+    has_try: bool,
+    def_count: usize,
+    has_lambda: bool,
+    has_comprehension: bool,
+}
+
+impl CodeFeatures {
+    fn from_source(source: &str) -> Self {
+        Self {
+            lines: source.lines().count(),
+            has_class: source.contains("class "),
+            has_async: source.contains("async ") || source.contains("await "),
+            has_decorator: source.contains('@'),
+            has_try: source.contains("try:") || source.contains("except "),
+            def_count: source.matches("def ").count(),
+            has_lambda: source.contains("lambda "),
+            has_comprehension: source.contains(" for ")
+                && (source.contains('[') || source.contains('{')),
+        }
+    }
+
+    const fn is_expert(&self) -> bool {
+        self.has_async || (self.has_decorator && self.has_class)
+    }
+
+    const fn is_hard(&self) -> bool {
+        self.has_class || (self.def_count > 2 && self.has_try)
+    }
+
+    const fn is_medium(&self) -> bool {
+        self.has_try || self.def_count > 1 || (self.has_comprehension && self.lines > 5)
+    }
+
+    const fn is_easy(&self) -> bool {
+        self.def_count > 0 || self.has_lambda || self.lines > 3
+    }
+}
+
 /// Infer difficulty from Python source code
 ///
 /// Uses heuristics based on code complexity:
@@ -57,37 +102,19 @@ pub fn to_bench_example(example: &PythonExample) -> BenchExample {
 /// - Expert: Async, decorators, metaprogramming
 #[must_use]
 pub fn infer_difficulty(source: &str) -> Difficulty {
-    let lines = source.lines().count();
-    let has_class = source.contains("class ");
-    let has_async = source.contains("async ") || source.contains("await ");
-    let has_decorator = source.contains('@');
-    let has_try = source.contains("try:") || source.contains("except ");
-    let has_def = source.matches("def ").count();
-    let has_lambda = source.contains("lambda ");
-    let has_comprehension = source.contains(" for ") && (source.contains('[') || source.contains('{'));
+    let features = CodeFeatures::from_source(source);
 
-    // Expert: async, decorators, or metaprogramming
-    if has_async || (has_decorator && has_class) {
-        return Difficulty::Expert;
+    if features.is_expert() {
+        Difficulty::Expert
+    } else if features.is_hard() {
+        Difficulty::Hard
+    } else if features.is_medium() {
+        Difficulty::Medium
+    } else if features.is_easy() {
+        Difficulty::Easy
+    } else {
+        Difficulty::Trivial
     }
-
-    // Hard: classes or complex patterns
-    if has_class || (has_def > 2 && has_try) {
-        return Difficulty::Hard;
-    }
-
-    // Medium: multiple functions, error handling, or comprehensions
-    if has_try || has_def > 1 || (has_comprehension && lines > 5) {
-        return Difficulty::Medium;
-    }
-
-    // Easy: single function with some logic
-    if has_def > 0 || has_lambda || lines > 3 {
-        return Difficulty::Easy;
-    }
-
-    // Trivial: simple statements
-    Difficulty::Trivial
 }
 
 /// Map `Py2RsLevel` to corpus example ID pattern
@@ -109,52 +136,103 @@ pub const fn level_to_example_pattern(level: Py2RsLevel) -> &'static str {
     }
 }
 
+/// Check if source contains async/await patterns
+fn is_concurrency_pattern(source: &str) -> bool {
+    source.contains("async ") || source.contains("await ")
+}
+
+/// Check if source contains metaprogramming patterns
+fn is_metaprogramming_pattern(source: &str) -> bool {
+    source.contains("@dataclass") || source.contains("@property")
+}
+
+/// Check if source contains FFI/unsafe patterns
+fn is_ffi_pattern(source: &str) -> bool {
+    source.contains("ctypes") || source.contains("cffi")
+}
+
+/// Check if source contains OOP patterns (class with methods)
+fn is_oop_pattern(source: &str) -> bool {
+    source.contains("class ") && source.contains("def ")
+}
+
+/// Check if source contains error handling patterns
+fn is_error_handling_pattern(source: &str) -> bool {
+    source.contains("try:") || source.contains("except ")
+}
+
+/// Check if source contains comprehension patterns
+fn is_comprehension_pattern(source: &str) -> bool {
+    let has_bracket_comp = source.contains('[') && source.contains(" for ");
+    let has_brace_comp = source.contains('{') && source.contains(" for ");
+    has_bracket_comp || has_brace_comp
+}
+
+/// Check if source contains loop patterns
+fn has_loop(source: &str) -> bool {
+    source.contains("for ") || source.contains("while ")
+}
+
+/// Check if name matches variable-level patterns
+fn is_variable_name_pattern(name: &str) -> bool {
+    let name_lower = name.to_lowercase();
+    name_lower.contains("abs") || name_lower.contains("factorial")
+}
+
 /// Classify a corpus example into a `Py2RsLevel`
 #[must_use]
 pub fn classify_example_level(example: &PythonExample) -> Py2RsLevel {
     let source = &example.source;
-    let name = &example.name;
-
-    // Check for specific patterns
-    if source.contains("async ") || source.contains("await ") {
-        return Py2RsLevel::Concurrency;
-    }
-    if source.contains("@dataclass") || source.contains("@property") {
-        return Py2RsLevel::Metaprogramming;
-    }
-    if source.contains("ctypes") || source.contains("cffi") {
-        return Py2RsLevel::FfiUnsafe;
-    }
-    if source.contains("class ") && source.contains("def ") {
-        return Py2RsLevel::OopTraits;
-    }
-    if source.contains("try:") || source.contains("except ") {
-        return Py2RsLevel::ErrorHandling;
-    }
-
-    // Check by complexity
     let def_count = source.matches("def ").count();
-    let has_loop = source.contains("for ") || source.contains("while ");
-    let has_comprehension = (source.contains('[') && source.contains(" for "))
-        || (source.contains('{') && source.contains(" for "));
 
-    if has_comprehension {
-        return Py2RsLevel::Collections;
+    // Priority-ordered pattern matching
+    classify_by_advanced_patterns(source)
+        .or_else(|| classify_by_structure_patterns(source, def_count))
+        .or_else(|| classify_by_name(&example.name))
+        .unwrap_or(Py2RsLevel::Hello)
+}
+
+/// Classify by advanced Python patterns (async, metaprogramming, ffi, oop, errors)
+fn classify_by_advanced_patterns(source: &str) -> Option<Py2RsLevel> {
+    if is_concurrency_pattern(source) {
+        return Some(Py2RsLevel::Concurrency);
     }
-    if has_loop && def_count > 0 {
-        return Py2RsLevel::ControlFlow;
+    if is_metaprogramming_pattern(source) {
+        return Some(Py2RsLevel::Metaprogramming);
+    }
+    if is_ffi_pattern(source) {
+        return Some(Py2RsLevel::FfiUnsafe);
+    }
+    if is_oop_pattern(source) {
+        return Some(Py2RsLevel::OopTraits);
+    }
+    if is_error_handling_pattern(source) {
+        return Some(Py2RsLevel::ErrorHandling);
+    }
+    None
+}
+
+/// Classify by code structure (comprehensions, loops, functions)
+fn classify_by_structure_patterns(source: &str, def_count: usize) -> Option<Py2RsLevel> {
+    if is_comprehension_pattern(source) {
+        return Some(Py2RsLevel::Collections);
+    }
+    if has_loop(source) && def_count > 0 {
+        return Some(Py2RsLevel::ControlFlow);
     }
     if def_count > 0 {
-        return Py2RsLevel::Functions;
+        return Some(Py2RsLevel::Functions);
     }
+    None
+}
 
-    // Check by name patterns
-    let name_lower = name.to_lowercase();
-    if name_lower.contains("abs") || name_lower.contains("factorial") {
-        return Py2RsLevel::Variables;
+/// Classify by example name patterns
+fn classify_by_name(name: &str) -> Option<Py2RsLevel> {
+    if is_variable_name_pattern(name) {
+        Some(Py2RsLevel::Variables)
+    } else {
+        None
     }
-
-    Py2RsLevel::Hello
 }
 
 /// Batch convert corpus examples to bench examples
@@ -232,7 +310,10 @@ mod tests {
     // TDD: Test conversion
     #[test]
     fn test_to_bench_example() {
-        let example = make_example("factorial", "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)");
+        let example = make_example(
+            "factorial",
+            "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)",
+        );
         let bench_ex = to_bench_example(&example);
 
         assert_eq!(bench_ex.id, "factorial");
@@ -273,10 +354,7 @@ mod tests {
 
     #[test]
     fn test_classify_example_level_oop() {
-        let example = make_example(
-            "shape",
-            "class Shape:\n    def area(self):\n        pass",
-        );
+        let example = make_example("shape", "class Shape:\n    def area(self):\n        pass");
         assert_eq!(classify_example_level(&example), Py2RsLevel::OopTraits);
     }
 
@@ -295,7 +373,10 @@ mod tests {
             "point",
             "@dataclass\nclass Point:\n    x: float\n    y: float",
         );
-        assert_eq!(classify_example_level(&example), Py2RsLevel::Metaprogramming);
+        assert_eq!(
+            classify_example_level(&example),
+            Py2RsLevel::Metaprogramming
+        );
     }
 
     // TDD: Test batch conversion

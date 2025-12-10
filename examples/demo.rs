@@ -8,6 +8,33 @@ use single_shot_eval::{
 use std::collections::HashMap;
 use std::time::Duration;
 
+/// Classify Cohen's d effect size
+fn classify_effect_size(d: f64) -> &'static str {
+    let abs_d = d.abs();
+    if abs_d < 0.2 {
+        "negligible"
+    } else if abs_d < 0.5 {
+        "small"
+    } else if abs_d < 0.8 {
+        "medium"
+    } else {
+        "large"
+    }
+}
+
+/// Print available CLI baselines
+fn print_cli_baselines() {
+    println!("\n🔌 Available CLI Baselines...\n");
+    let baselines = available_baselines();
+    if baselines.is_empty() {
+        println!("  (none installed - evaluation runs offline)");
+    } else {
+        for b in baselines {
+            println!("  ✓ {b}");
+        }
+    }
+}
+
 #[allow(clippy::too_many_lines)]
 fn main() {
     println!("=== Single-Shot Eval Demo ===\n");
@@ -108,15 +135,7 @@ fn main() {
         println!(
             "  Cohen's d: {:.3} ({})",
             sig.cohens_d,
-            if sig.cohens_d.abs() < 0.2 {
-                "negligible"
-            } else if sig.cohens_d.abs() < 0.5 {
-                "small"
-            } else if sig.cohens_d.abs() < 0.8 {
-                "medium"
-            } else {
-                "large"
-            }
+            classify_effect_size(sig.cohens_d)
         );
         println!(
             "  Significant: {}",
@@ -125,15 +144,7 @@ fn main() {
     }
 
     // 5. Check available baselines
-    println!("\n🔌 Available CLI Baselines...\n");
-    let baselines = available_baselines();
-    if baselines.is_empty() {
-        println!("  (none installed - evaluation runs offline)");
-    } else {
-        for b in baselines {
-            println!("  ✓ {b}");
-        }
-    }
+    print_cli_baselines();
 
     // 6. Generate report
     println!("\n📝 Generating Report...\n");

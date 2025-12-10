@@ -263,6 +263,41 @@ impl BaselineConfig {
             cost_per_1k_tokens: 0.005,
         }
     }
+
+    /// Create Ollama CLI baseline configuration for a specific model
+    #[must_use]
+    pub fn ollama(model: &str) -> Self {
+        Self {
+            name: format!("ollama:{model}"),
+            command: "ollama".to_string(),
+            args_template: format!("run {model} \"{{prompt}}\""),
+            cost_per_1k_tokens: 0.0, // FREE - local inference
+        }
+    }
+
+    /// Create Ollama baseline for qwen2.5-coder
+    #[must_use]
+    pub fn ollama_qwen() -> Self {
+        Self::ollama("qwen2.5-coder:1.5b")
+    }
+
+    /// Create Ollama baseline for deepseek-coder
+    #[must_use]
+    pub fn ollama_deepseek() -> Self {
+        Self::ollama("deepseek-coder:1.3b")
+    }
+
+    /// Create Ollama baseline for starcoder2
+    #[must_use]
+    pub fn ollama_starcoder() -> Self {
+        Self::ollama("starcoder2:3b")
+    }
+
+    /// Create Ollama baseline for phi2
+    #[must_use]
+    pub fn ollama_phi2() -> Self {
+        Self::ollama("phi2:2.7b")
+    }
 }
 
 /// Task loader for loading multiple task configurations from glob patterns
@@ -289,10 +324,9 @@ impl TaskLoader {
             .map_err(|e| ConfigError::MissingField(format!("Invalid glob pattern: {e}")))?;
 
         for entry in paths {
-            let path = entry
-                .map_err(|e| ConfigError::IoError(std::io::Error::other(
-                    format!("Glob error: {e}")
-                )))?;
+            let path = entry.map_err(|e| {
+                ConfigError::IoError(std::io::Error::other(format!("Glob error: {e}")))
+            })?;
 
             let config = TaskConfig::load(&path)?;
             loader.tasks.push(config);
@@ -308,7 +342,9 @@ impl TaskLoader {
     /// Returns an error if the file cannot be loaded.
     pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Self, ConfigError> {
         let config = TaskConfig::load(path)?;
-        Ok(Self { tasks: vec![config] })
+        Ok(Self {
+            tasks: vec![config],
+        })
     }
 
     /// Get all loaded tasks

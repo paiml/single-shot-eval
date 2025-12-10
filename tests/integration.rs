@@ -51,8 +51,11 @@ fn test_cli_verify_valid_rust() {
     // Create a temp file with valid Rust code
     let temp_dir = tempfile::tempdir().expect("Failed to create temp dir");
     let source_file = temp_dir.path().join("valid.rs");
-    std::fs::write(&source_file, "pub fn add(a: i32, b: i32) -> i32 { a + b }\n")
-        .expect("Failed to write source file");
+    std::fs::write(
+        &source_file,
+        "pub fn add(a: i32, b: i32) -> i32 { a + b }\n",
+    )
+    .expect("Failed to write source file");
 
     let output = Command::new("cargo")
         .args([
@@ -140,7 +143,10 @@ fn test_task_loader_loads_all_tasks() {
             !config.task.domain.is_empty(),
             "Task domain should not be empty"
         );
-        assert!(config.evaluation.samples > 0, "Should have positive samples");
+        assert!(
+            config.evaluation.samples > 0,
+            "Should have positive samples"
+        );
     }
 }
 
@@ -150,7 +156,10 @@ fn test_task_loader_validates_yaml_structure() {
 
     for config in loader.iter() {
         // Verify evaluation config
-        assert!(config.evaluation.timeout_ms > 0, "Timeout should be positive");
+        assert!(
+            config.evaluation.timeout_ms > 0,
+            "Timeout should be positive"
+        );
 
         // Verify prompts config has required fields
         let prompts = &config.prompts;
@@ -175,7 +184,9 @@ pub fn greet(name: &str) -> String {
 }
 "#;
 
-    let result = verifier.verify(code, None).expect("Verification should succeed");
+    let result = verifier
+        .verify(code, None)
+        .expect("Verification should succeed");
     assert!(result.compiles, "Simple function should compile");
 }
 
@@ -212,7 +223,9 @@ impl Cache {
 }
 "#;
 
-    let result = verifier.verify(code, None).expect("Verification should succeed");
+    let result = verifier
+        .verify(code, None)
+        .expect("Verification should succeed");
     assert!(result.compiles, "Standard library code should compile");
 }
 
@@ -233,7 +246,9 @@ pub fn broken_add(a: i32, b: i32) -> i32 {
     }
 "#;
 
-    let result = verifier.verify(code, Some(tests)).expect("Verification should run");
+    let result = verifier
+        .verify(code, Some(tests))
+        .expect("Verification should run");
     assert!(result.compiles, "Code should compile even with bug");
     assert!(
         !result.tests_pass.unwrap_or(true),
@@ -274,16 +289,16 @@ fn test_pareto_analysis_with_realistic_data() {
         EvalResult {
             model_id: "claude-3.5-sonnet".to_string(),
             task_id: "code-transpile".to_string(),
-            accuracy: 0.95,           // Frontier: high accuracy
-            cost: 15.0,               // But expensive
+            accuracy: 0.95, // Frontier: high accuracy
+            cost: 15.0,     // But expensive
             latency: Duration::from_millis(500),
             metadata: HashMap::new(),
         },
         EvalResult {
             model_id: "qwen2.5-coder-1.5b".to_string(),
             task_id: "code-transpile".to_string(),
-            accuracy: 0.82,           // Good enough
-            cost: 0.10,               // 150x cheaper!
+            accuracy: 0.82, // Good enough
+            cost: 0.10,     // 150x cheaper!
             latency: Duration::from_millis(50),
             metadata: HashMap::new(),
         },
@@ -313,8 +328,12 @@ fn test_pareto_analysis_with_realistic_data() {
         "Should have frontier models"
     );
     assert!(
-        analysis.frontier_models.contains(&"claude-3.5-sonnet".to_string())
-            || analysis.frontier_models.contains(&"qwen2.5-coder-1.5b".to_string()),
+        analysis
+            .frontier_models
+            .contains(&"claude-3.5-sonnet".to_string())
+            || analysis
+                .frontier_models
+                .contains(&"qwen2.5-coder-1.5b".to_string()),
         "Top models should be on frontier"
     );
 
@@ -349,7 +368,11 @@ fn test_compute_pareto_frontier_basic() {
     let frontier = compute_pareto_frontier(&results);
 
     // Both should be on frontier (trade-off between accuracy and cost)
-    assert_eq!(frontier.len(), 2, "Both models should be on Pareto frontier");
+    assert_eq!(
+        frontier.len(),
+        2,
+        "Both models should be on Pareto frontier"
+    );
 }
 
 // ============================================================================
@@ -374,7 +397,10 @@ fn test_report_builder_json_output() {
 
     let json = report.to_json().expect("Should serialize to JSON");
     assert!(json.contains("test-model"), "JSON should contain model ID");
-    assert!(json.contains("0.85") || json.contains("85"), "JSON should contain accuracy");
+    assert!(
+        json.contains("0.85") || json.contains("85"),
+        "JSON should contain accuracy"
+    );
 }
 
 #[test]

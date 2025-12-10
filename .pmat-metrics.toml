@@ -1,0 +1,52 @@
+# O(1) Quality Gate Metric Thresholds
+# Spec: EXTREME TDD with 95% coverage target
+# Pattern: Toyota Way - Jidoka (MEAN mode: warnings = errors)
+
+[thresholds]
+# Hard limits (block commits)
+lint_max_ms = 60_000              # 1min (small project)
+test_fast_max_ms = 30_000         # 30s (unit tests only, <10s target)
+coverage_max_ms = 120_000         # 2min (small codebase)
+binary_max_bytes = 20_000_000     # 20 MB (CLI binary target)
+deps_default_max = 500            # 500 dependencies (keep lean)
+
+# Soft limits (warnings only)
+build_release_max_ms = 180_000    # 3min (with LTO)
+deps_minimal_max = 300            # 300 dependencies (minimal features)
+
+[staleness]
+# Metrics older than this trigger warnings
+max_age_days = 7
+
+[enforcement]
+# Pre-commit behavior (MEAN mode = strict)
+fail_on_stale_metrics = false     # Warn, don't block
+fail_on_missing_metrics = false   # Allow commits if no cache
+fail_on_threshold_violation = true # Block commits on violations (MEAN mode)
+
+[trend_analysis]
+# Track metrics for Kaizen (continuous improvement)
+enabled = true
+retention_days = 90
+alert_on_regression = true
+regression_threshold_pct = 10.0   # Alert if >10% slower
+
+# EXTREME TDD Quality Gates
+[quality_gates]
+# NASA standard: 85%, EXTREME TDD: 95%
+min_coverage_pct = 95.0           # Target: ≥95% line coverage
+min_mutation_score_pct = 80.0     # Target: ≥80% mutation score
+max_cyclomatic_complexity = 15    # Target: ≤15 per function
+min_tdg_grade = "A"               # Target: A or better (≥90)
+max_unwrap_calls = 0              # ZERO unwrap() calls allowed
+
+# Performance budgets
+[performance]
+# Evaluation engine targets
+min_eval_throughput = 100         # 100+ evaluations/sec
+max_memory_usage_mb = 256         # ≤256MB for evaluation runs
+max_regression_pct = 5.0          # ≤5% performance regression allowed
+
+# Pareto analysis targets
+pareto_compute_max_ms = 100       # <100ms for frontier computation
+metrics_collection_max_ms = 50    # <50ms per metric collection

@@ -3,9 +3,18 @@
 //! Provides OFFLINE-FIRST baseline evaluation by shelling out to installed
 //! CLI tools (`claude`, `gemini`). NO HTTP API calls - all communication
 //! via subprocess execution.
+//!
+//! ## Sovereign Inference (replaces ollama)
+//!
+//! When the `sovereign-inference` feature is enabled, local .apr models are
+//! preferred over ollama for OFFLINE-FIRST evaluation using the realizar engine.
 
 use crate::config::BaselineConfig;
+#[cfg(feature = "sovereign-inference")]
+use crate::sovereign::{list_models, ModelFormat, SovereignRunner};
 use std::io::{BufRead, BufReader};
+#[cfg(feature = "sovereign-inference")]
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 use thiserror::Error;
@@ -27,6 +36,10 @@ pub enum BaselineError {
 
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
+
+    #[cfg(feature = "sovereign-inference")]
+    #[error("Sovereign inference error: {0}")]
+    SovereignError(#[from] crate::sovereign::SovereignError),
 }
 
 /// Result from a baseline CLI invocation
@@ -69,6 +82,38 @@ impl BaselineRunner {
             config: BaselineConfig::gemini(),
             timeout: Duration::from_secs(120),
         }
+    }
+
+    /// Create a new baseline runner for Ollama with a specific model
+    #[must_use]
+    pub fn ollama(model: &str) -> Self {
+        Self {
+            config: BaselineConfig::ollama(model),
+            timeout: Duration::from_secs(300), // Longer timeout for local models
+        }
+    }
+
+    /// Create baseline runners for all installed CODE SLMs
+    #[must_use]
+    pub fn ollama_code_slms() -> Vec<Self> {
+        vec![
+            Self {
+                config: BaselineConfig::ollama_qwen(),
+                timeout: Duration::from_secs(300),
+            },
+            Self {
+                config: BaselineConfig::ollama_deepseek(),
+                timeout: Duration::from_secs(300),
+            },
+            Self {
+                config: BaselineConfig::ollama_starcoder(),
+                timeout: Duration::from_secs(300),
+            },
+            Self {
+                config: BaselineConfig::ollama_phi2(),
+                timeout: Duration::from_secs(300),
+            },
+        ]
     }
 
     /// Create a baseline runner with custom configuration
@@ -197,7 +242,103 @@ pub fn available_baselines() -> Vec<String> {
         available.push("gemini".to_string());
     }
 
+    // SOVEREIGN-FIRST: Check for .apr models before ollama
+    #[cfg(feature = "sovereign-inference")]
+    {
+        for (path, format) in list_sovereign_models() {
+            if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
+                available.push(format!("sovereign:{}:{}", format.as_str(), name));
+            }
+        }
+    }
+
+    // FALLBACK: Check for ollama and its models (when sovereign not available)
+    if is_ollama_available() {
+        for model in list_ollama_models() {
+            available.push(format!("ollama:{model}"));
+        }
+    }
+
     available
+}
+
+/// Check if ollama is installed
+#[must_use]
+pub fn is_ollama_available() -> bool {
+    Command::new("which")
+        .arg("ollama")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success())
+}
+
+/// List available ollama models
+#[must_use]
+pub fn list_ollama_models() -> Vec<String> {
+    let output = Command::new("ollama").arg("list").output();
+
+    match output {
+        Ok(output) if output.status.success() => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            stdout
+                .lines()
+                .skip(1) // Skip header
+                .filter_map(|line| line.split_whitespace().next())
+                .map(String::from)
+                .collect()
+        }
+        _ => Vec::new(),
+    }
+}
+
+// =============================================================================
+// SOVEREIGN INFERENCE - Native .apr model execution via realizar
+// =============================================================================
+
+/// Default directory to search for sovereign models
+#[cfg(feature = "sovereign-inference")]
+const SOVEREIGN_MODEL_DIR: &str = "./models";
+
+/// List available sovereign models (.apr, .gguf, .safetensors)
+///
+/// Searches in the default models directory for supported formats.
+/// Priority: .apr (PRIMARY) > .gguf > .safetensors
+#[cfg(feature = "sovereign-inference")]
+#[must_use]
+pub fn list_sovereign_models() -> Vec<(PathBuf, ModelFormat)> {
+    list_models(SOVEREIGN_MODEL_DIR)
+}
+
+/// Check if sovereign inference is available
+#[cfg(feature = "sovereign-inference")]
+#[must_use]
+pub fn is_sovereign_available() -> bool {
+    crate::sovereign::is_sovereign_available()
+}
+
+/// Run a prompt against a sovereign model
+///
+/// # Errors
+///
+/// Returns an error if the model cannot be loaded or inference fails.
+#[cfg(feature = "sovereign-inference")]
+pub fn run_sovereign_prompt(
+    model_path: &std::path::Path,
+    prompt: &str,
+) -> Result<BaselineResult, BaselineError> {
+    let start = Instant::now();
+
+    let runner = SovereignRunner::load(model_path)?;
+    let result = runner.run_prompt(prompt)?;
+
+    Ok(BaselineResult {
+        model_id: format!("sovereign:{}", result.model_id),
+        response: result.response,
+        latency: start.elapsed(),
+        estimated_cost: 0.0, // Sovereign inference is FREE (offline)
+        success: result.success,
+    })
 }
 
 /// Run a prompt against all available baselines
@@ -277,8 +418,10 @@ mod tests {
     fn test_available_baselines() {
         // This should return a list (possibly empty if tools not installed)
         let baselines = available_baselines();
-        // Just verify it doesn't panic
-        assert!(baselines.len() <= 2);
+        // Just verify it doesn't panic and returns valid names
+        for baseline in &baselines {
+            assert!(!baseline.is_empty());
+        }
     }
 
     #[test]

@@ -89,7 +89,9 @@ fn test_placeholder_model_inference_various_inputs() {
 #[test]
 fn test_inference_output_latency() {
     let model = create_placeholder_model("latency-test");
-    let result = model.infer("def test(): return 42").expect("should succeed");
+    let result = model
+        .infer("def test(): return 42")
+        .expect("should succeed");
 
     // Inference should be fast (< 100ms for placeholder)
     assert!(result.latency < Duration::from_millis(100));
@@ -152,10 +154,7 @@ fn test_infer_difficulty_comprehensive() {
     );
 
     // Easy: lambda
-    assert_eq!(
-        infer_difficulty("f = lambda x: x * 2"),
-        Difficulty::Easy
-    );
+    assert_eq!(infer_difficulty("f = lambda x: x * 2"), Difficulty::Easy);
 
     // Medium: multiple functions
     assert_eq!(
@@ -295,7 +294,9 @@ fn test_pareto_single_result() {
     }];
 
     let analysis = analyze_pareto(&results);
-    assert!(analysis.frontier_models.contains(&"single-model".to_string()));
+    assert!(analysis
+        .frontier_models
+        .contains(&"single-model".to_string()));
 }
 
 #[test]
@@ -507,7 +508,11 @@ fn test_corpus_load_directory_with_examples() {
     let example_foo = temp_dir.path().join("example_foo");
     std::fs::create_dir(&example_foo).expect("mkdir");
     std::fs::write(example_foo.join("foo.py"), "def foo(): pass").expect("write");
-    std::fs::write(example_foo.join("test_foo.py"), "def test_foo(): assert True").expect("write");
+    std::fs::write(
+        example_foo.join("test_foo.py"),
+        "def test_foo(): assert True",
+    )
+    .expect("write");
 
     // Create example_bar directory
     let example_bar = temp_dir.path().join("example_bar");
@@ -543,8 +548,8 @@ fn test_corpus_example_primary_file_fallback() {
 
 #[test]
 fn test_report_from_evaluation_report() {
+    use single_shot_eval::runner::{BaselineEvalResult, EvaluationReport};
     use single_shot_eval::{EvalResult, ReportBuilder};
-    use single_shot_eval::runner::{EvaluationReport, BaselineEvalResult};
     use std::collections::HashMap;
 
     let eval_report = EvaluationReport {
@@ -840,8 +845,8 @@ fn test_runner_config_all_fields() {
 
 #[test]
 fn test_evaluation_report_methods() {
-    use single_shot_eval::{EvalResult};
-    use single_shot_eval::runner::{EvaluationReport, BaselineEvalResult};
+    use single_shot_eval::runner::{BaselineEvalResult, EvaluationReport};
+    use single_shot_eval::EvalResult;
     use std::collections::HashMap;
 
     // Test with multiple baselines
@@ -927,7 +932,19 @@ fn test_available_baselines_function() {
 
     // Should return vec of available baselines (may be empty)
     let baselines = available_baselines();
-    assert!(baselines.len() <= 2); // At most claude and gemini
+    // Can include claude, gemini, sovereign models, and ollama models
+    // Just verify it returns a valid vec without errors
+    for baseline in &baselines {
+        assert!(!baseline.is_empty());
+        // Each baseline should be "claude", "gemini", "sovereign:*", or "ollama:model_name"
+        assert!(
+            baseline == "claude"
+                || baseline == "gemini"
+                || baseline.starts_with("sovereign:")
+                || baseline.starts_with("ollama:"),
+            "Unexpected baseline: {baseline}"
+        );
+    }
 }
 
 #[test]
@@ -1026,8 +1043,10 @@ fn test_corpus_missing_source_in_directory() {
 
 #[test]
 fn test_runner_run_evaluation_multiple_models() {
+    use single_shot_eval::config::{
+        EvaluationSettings, GroundTruthConfig, MetricType, PromptConfig, TaskConfig, TaskDefinition,
+    };
     use single_shot_eval::TaskRunner;
-    use single_shot_eval::config::{TaskConfig, TaskDefinition, EvaluationSettings, MetricType, PromptConfig, GroundTruthConfig};
 
     let task = TaskConfig {
         task: TaskDefinition {
@@ -1055,7 +1074,9 @@ fn test_runner_run_evaluation_multiple_models() {
 
     // Test different model types for simulate_* functions
     for model_id in &["test-slm", "test-claude", "test-gemini", "other-model"] {
-        let result = runner.run_evaluation(&task, model_id).expect("should succeed");
+        let result = runner
+            .run_evaluation(&task, model_id)
+            .expect("should succeed");
         assert!(!result.model_id.is_empty());
         assert!(result.accuracy > 0.0);
     }
@@ -1064,8 +1085,10 @@ fn test_runner_run_evaluation_multiple_models() {
 #[test]
 #[ignore = "slow: calls external baseline CLIs"]
 fn test_runner_with_baselines_enabled() {
-    use single_shot_eval::{TaskRunner, RunnerConfig};
-    use single_shot_eval::config::{TaskConfig, TaskDefinition, EvaluationSettings, MetricType, PromptConfig, GroundTruthConfig};
+    use single_shot_eval::config::{
+        EvaluationSettings, GroundTruthConfig, MetricType, PromptConfig, TaskConfig, TaskDefinition,
+    };
+    use single_shot_eval::{RunnerConfig, TaskRunner};
 
     let task = TaskConfig {
         task: TaskDefinition {
@@ -1127,7 +1150,9 @@ fn test_inference_template_transform_patterns() {
         assert!(
             result.text.contains(expected),
             "Expected '{}' in output for input '{}', got: '{}'",
-            expected, input, result.text
+            expected,
+            input,
+            result.text
         );
     }
 }
@@ -1137,7 +1162,9 @@ fn test_inference_output_tokens_and_latency() {
     use single_shot_eval::create_placeholder_model;
 
     let model = create_placeholder_model("metrics-test");
-    let result = model.infer("def hello(): print('hi')").expect("should work");
+    let result = model
+        .infer("def hello(): print('hi')")
+        .expect("should work");
 
     // Verify output structure
     assert!(!result.text.is_empty());
@@ -1164,8 +1191,8 @@ fn test_loaded_model_id_and_metadata() {
 
 #[test]
 fn test_report_with_slm_pareto_dominant() {
-    use single_shot_eval::{EvalResult, ReportBuilder};
     use single_shot_eval::runner::BaselineEvalResult;
+    use single_shot_eval::{EvalResult, ReportBuilder};
     use std::collections::HashMap;
 
     let mut builder = ReportBuilder::new("dominant-test");
@@ -1242,7 +1269,8 @@ fn test_corpus_stats_computation() {
         let code = format!("def func_{i}():\n    return {i}\n");
         std::fs::write(example_dir.join(format!("func_{i}.py")), &code).expect("write");
         if i == 1 {
-            std::fs::write(example_dir.join("test_func_1.py"), "def test(): pass\n").expect("write");
+            std::fs::write(example_dir.join("test_func_1.py"), "def test(): pass\n")
+                .expect("write");
         }
     }
 
